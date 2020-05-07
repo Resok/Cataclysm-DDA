@@ -2679,11 +2679,11 @@ std::vector<item_location> Character::find_reloadables()
         bool reloadable = false;
         if( node->is_gun() && !node->magazine_compatible().empty() ) {
             reloadable = node->magazine_current() == nullptr ||
-                         node->ammo_remaining() < node->ammo_capacity();
+                         node->remaining_ammo_capacity() > 0;
         } else {
             reloadable = ( node->is_magazine() ||
                            ( node->is_gun() && node->magazine_integral() ) ) &&
-                         node->ammo_remaining() < node->ammo_capacity();
+                         node->remaining_ammo_capacity() > 0;
         }
         if( reloadable ) {
             reloadables.push_back( item_location( *this, node ) );

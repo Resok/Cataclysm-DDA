@@ -10,14 +10,14 @@ TEST_CASE( "spawn with default charges and with ammo", "[item_group]" )
         item matches( "matches" );
         REQUIRE( matches.ammo_default() == "NULL" );
         default_charges.modify( matches );
-        CHECK( matches.ammo_remaining() == matches.ammo_capacity() );
+        CHECK( matches.remaining_ammo_capacity() == 0 );
     }
 
     SECTION( "gun with ammo type" ) {
         item glock( "glock_19" );
         REQUIRE( glock.ammo_default() != "NULL" );
         default_charges.modify( glock );
-        CHECK( glock.ammo_remaining() == glock.ammo_capacity() );
+        CHECK( glock.remaining_ammo_capacity() == 0 );
     }
 }
 
