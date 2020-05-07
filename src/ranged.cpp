@@ -2989,7 +2989,7 @@ void target_ui::panel_gun_info( int &text_y )
     } else if( ammo ) {
         str = string_format( m->ammo_remaining() ? _( "Ammo: %s (%d/%d)" ) : _( "Ammo: %s" ),
                              colorize( ammo->nname( std::max( m->ammo_remaining(), 1 ) ), ammo->color ), m->ammo_remaining(),
-                             m->ammo_capacity() );
+                             m->ammo_capacity( ammo->ammo->type ) );
         print_colored_text( w_target, point( 1, text_y++ ), clr, clr, str );
     } else {
         // Weapon doesn't use ammunition

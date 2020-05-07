@@ -89,10 +89,10 @@ static std::map<itype_id, int> set_vehicle_fuel( vehicle &v, const float veh_fue
         vehicle_part &pt = vp.part();
 
         if( pt.is_battery() ) {
-            pt.ammo_set( "battery", pt.ammo_capacity() * veh_fuel_mult );
-            ret[ "battery" ] += pt.ammo_capacity() * veh_fuel_mult;
+            pt.ammo_set( "battery", pt.ammo_capacity( ammotype( "battery" ) ) * veh_fuel_mult );
+            ret[ "battery" ] += pt.ammo_capacity( ammotype( "battery" ) ) * veh_fuel_mult;
         } else if( pt.is_tank() && liquid_fuel != "null" ) {
-            float qty = pt.ammo_capacity() * veh_fuel_mult;
+            float qty = pt.ammo_capacity( item::find_type( liquid_fuel )->ammo->type ) * veh_fuel_mult;
             qty *= std::max( item::find_type( liquid_fuel )->stack_size, 1 );
             qty /= to_milliliter( units::legacy_volume_factor );
             pt.ammo_set( liquid_fuel, qty );

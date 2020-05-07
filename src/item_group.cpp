@@ -265,7 +265,8 @@ void Item_modifier::modify( item &new_item ) const
 
     int max_capacity = -1;
     if( charges.first != -1 && charges.second == -1 ) {
-        const int max_ammo = new_item.ammo_capacity();
+        const int max_ammo = new_item.ammo_capacity( item_controller->find_template(
+                                 new_item.ammo_default() )->ammo->type );
         if( max_ammo > 0 ) {
             max_capacity = max_ammo;
         }
@@ -308,11 +309,7 @@ void Item_modifier::modify( item &new_item ) const
             // spawn a "water (0)" item.
             new_item.charges = std::max( 1, ch );
         } else if( new_item.is_tool() ) {
-            const int qty = std::min( ch, new_item.ammo_capacity() );
-            new_item.charges = qty;
-            if( !new_item.ammo_types().empty() && qty > 0 ) {
-                new_item.ammo_set( new_item.ammo_default(), qty );
-            }
+            new_item.ammo_set( new_item.ammo_default(), ch );
         } else if( new_item.type->can_have_charges() ) {
             new_item.charges = ch;
         }
@@ -330,7 +327,8 @@ void Item_modifier::modify( item &new_item ) const
         }
         // Make sure the item is in valid state
         if( new_item.ammo_data() && new_item.magazine_integral() ) {
-            new_item.charges = std::min( new_item.charges, new_item.ammo_capacity() );
+            new_item.charges = std::min( new_item.charges,
+                                         new_item.ammo_capacity( item_controller->find_template( new_item.ammo_default() )->ammo->type ) );
         } else {
             new_item.charges = 0;
         }

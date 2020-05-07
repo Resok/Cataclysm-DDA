@@ -148,6 +148,8 @@ class item_contents
         // returns qty - need
         int ammo_consume( int qty );
         item *magazine_current();
+        std::set<ammotype> ammo_types() const;
+        int ammo_capacity( const ammotype &ammo ) const;
         // gets the first ammo in all magazine pockets
         // does not support multiple magazine pockets!
         item &first_ammo();

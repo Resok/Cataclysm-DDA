@@ -372,6 +372,32 @@ item *item_contents::magazine_current()
     return nullptr;
 }
 
+int item_contents::ammo_capacity( const ammotype &ammo ) const
+{
+    int ret = 0;
+    for( const item_pocket &pocket : contents ) {
+        if( !pocket.is_type( item_pocket::pocket_type::MAGAZINE ) ) {
+            continue;
+        }
+        ret += pocket.ammo_capacity( ammo );
+    }
+    return ret;
+}
+
+std::set<ammotype> item_contents::ammo_types() const
+{
+    std::set<ammotype> ret;
+    for( const item_pocket &pocket : contents ) {
+        if( !pocket.is_type( item_pocket::pocket_type::MAGAZINE ) ) {
+            continue;
+        }
+        for( const ammotype &ammo : pocket.ammo_types() ) {
+            ret.emplace( ammo );
+        }
+    }
+    return ret;
+}
+
 item &item_contents::first_ammo()
 {
     for( item_pocket &pocket : contents ) {

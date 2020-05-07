@@ -2664,6 +2664,13 @@ hint_rating player::rate_action_wear( const item &it ) const
 
 bool player::can_reload( const item &it, const itype_id &ammo ) const
 {
+    if( ammo.empty() ) {
+        // if no ammo is passed, we just want to know if the player has an ammo for this item
+        return has_item_with( [&it]( const item & ammo ) {
+            return it.ammo_types().count( ammo.ammo_type() ) > 0;
+        } );
+    }
+
     if( !it.is_reloadable_with( ammo ) ) {
         return false;
     }
@@ -3108,7 +3115,7 @@ bool player::unload( item &it )
     }
 
     // Next check for any reasons why the item cannot be unloaded
-    if( target->ammo_types().empty() || target->ammo_capacity() <= 0 ) {
+    if( target->ammo_types().empty() ) {
         add_msg( m_info, _( "You can't unload a %s!" ), target->tname() );
         return false;
     }
@@ -3271,11 +3278,7 @@ hint_rating player::rate_action_unload( const item &it ) const
         return hint_rating::good;
     }
 
-    if( it.ammo_capacity() > 0 ) {
-        return hint_rating::iffy;
-    }
-
-    return hint_rating::cant;
+    return hint_rating::iffy;
 }
 
 hint_rating player::rate_action_mend( const item &it ) const
@@ -4139,13 +4142,18 @@ std::string player::weapname( unsigned int truncate ) const
 {
     if( weapon.is_gun() ) {
         std::string str = string_format( "(%s) %s", weapon.gun_current_mode().tname(), weapon.type_name() );
-
+        const itype *loaded_ammo = weapon.ammo_data();
         // Is either the base item or at least one auxiliary gunmod loaded (includes empty magazines)
-        bool base = weapon.ammo_capacity() > 0 && !weapon.has_flag( "RELOAD_AND_SHOOT" );
-
+        bool base = loaded_ammo != nullptr && !weapon.has_flag( "RELOAD_AND_SHOOT" );
+        ammotype loaded_ammotype;
+        if( loaded_ammo == nullptr ) {
+            loaded_ammotype = item::find_type( weapon.ammo_default() )->ammo->type;
+        } else {
+            loaded_ammotype = loaded_ammo->ammo->type;
+        }
         const auto mods = weapon.gunmods();
         bool aux = std::any_of( mods.begin(), mods.end(), [&]( const item * e ) {
-            return e->is_gun() && e->ammo_capacity() > 0 && !e->has_flag( "RELOAD_AND_SHOOT" );
+            return e->is_gun() && e->ammo_capacity( loaded_ammotype ) > 0 && !e->has_flag( "RELOAD_AND_SHOOT" );
         } );
 
         if( base || aux ) {
@@ -4153,7 +4161,7 @@ std::string player::weapname( unsigned int truncate ) const
             if( base ) {
                 str += std::to_string( weapon.ammo_remaining() );
                 if( weapon.magazine_integral() ) {
-                    str += "/" + std::to_string( weapon.ammo_capacity() );
+                    str += "/" + std::to_string( weapon.ammo_capacity( loaded_ammotype ) );
                 }
             } else {
                 str += "---";
@@ -4161,10 +4169,10 @@ std::string player::weapname( unsigned int truncate ) const
             str += ")";
 
             for( auto e : mods ) {
-                if( e->is_gun() && e->ammo_capacity() > 0 && !e->has_flag( "RELOAD_AND_SHOOT" ) ) {
+                if( e->is_gun() && e->ammo_capacity( loaded_ammotype ) > 0 && !e->has_flag( "RELOAD_AND_SHOOT" ) ) {
                     str += " (" + std::to_string( e->ammo_remaining() );
                     if( e->magazine_integral() ) {
-                        str += "/" + std::to_string( e->ammo_capacity() );
+                        str += "/" + std::to_string( e->ammo_capacity( loaded_ammotype ) );
                     }
                     str += ")";
                 }

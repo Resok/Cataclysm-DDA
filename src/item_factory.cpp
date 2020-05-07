@@ -2219,6 +2219,9 @@ void Item_factory::check_and_create_magazine_pockets( itype &def )
         mag_data.max_item_length = 2_km;
         mag_data.rigid = true;
         mag_data.watertight = true;
+        for( const ammotype &ammo : def.magazine->type ) {
+            mag_data.ammo_restriction.emplace( ammo, def.magazine->capacity );
+        }
         def.pockets.push_back( mag_data );
         return;
     } else if( def.gun || !def.magazines.empty() ) {
@@ -2232,6 +2235,11 @@ void Item_factory::check_and_create_magazine_pockets( itype &def )
         mag_data.volume_capacity = 200_liter;
         mag_data.max_contains_weight = 400_kilogram;
         mag_data.max_item_length = 2_km;
+        if( def.gun ) {
+            for( const ammotype &ammo : def.gun->ammo ) {
+                mag_data.ammo_restriction.emplace( ammo, def.gun->clip );
+            }
+        }
         // the magazine pocket does not use can_contain like normal CONTAINER pockets
         // so we don't have to worry about having random items be put into the mag
         def.pockets.push_back( mag_data );

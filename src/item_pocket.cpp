@@ -413,6 +413,25 @@ int item_pocket::ammo_consume( int qty )
     return qty - need;
 }
 
+int item_pocket::ammo_capacity( const ammotype &ammo ) const
+{
+    const auto found_ammo = data->ammo_restriction.find( ammo );
+    if( found_ammo == data->ammo_restriction.end() ) {
+        return 0;
+    } else {
+        return found_ammo->second;
+    }
+}
+
+std::set<ammotype> item_pocket::ammo_types() const
+{
+    std::set<ammotype> ret;
+    for( const std::pair<ammotype, int> &type_pair : data->ammo_restriction ) {
+        ret.emplace( type_pair.first );
+    }
+    return ret;
+}
+
 void item_pocket::casings_handle( const std::function<bool( item & )> &func )
 {
     for( auto it = contents.begin(); it != contents.end(); ) {
@@ -580,7 +599,9 @@ void item_pocket::set_item_defaults()
         /* for guns and other items defined to have a magazine but don't use "ammo" */
         if( contained_item.is_magazine() ) {
             contained_item.ammo_set(
-                contained_item.ammo_default(), contained_item.ammo_capacity() / 2
+                contained_item.ammo_default(),
+                contained_item.ammo_capacity( item_controller->find_template(
+                                                  contained_item.ammo_default() )->ammo->type ) / 2
             );
         } else { //Contents are batteries or food
             contained_item.charges =

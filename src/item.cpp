@@ -555,10 +555,11 @@ units::energy item::set_energy( const units::energy &qty )
 
 item &item::ammo_set( const itype_id &ammo, int qty )
 {
+    const ammotype &ammo_type = item_controller->find_template( ammo )->ammo->type;
     if( qty < 0 ) {
         // completely fill an integral or existing magazine
         if( magazine_integral() || magazine_current() ) {
-            qty = ammo_capacity();
+            qty = ammo_capacity( ammo_type );
 
             // else try to add a magazine using default ammo count property if set
         } else if( magazine_default() != "null" ) {
@@ -566,7 +567,7 @@ item &item::ammo_set( const itype_id &ammo, int qty )
             if( mag.type->magazine->count > 0 ) {
                 qty = mag.type->magazine->count;
             } else {
-                qty = mag.ammo_capacity();
+                qty = mag.ammo_capacity( ammo_type );
             }
         }
     }
@@ -581,9 +582,9 @@ item &item::ammo_set( const itype_id &ammo, int qty )
         if( magazine_integral() ) {
             if( is_tool() ) {
                 curammo = nullptr;
-                charges = std::min( qty, ammo_capacity() );
+                charges = std::min( qty, ammo_capacity( ammo_type ) );
             } else if( is_gun() ) {
-                const item temp_ammo( ammo_default(), calendar::turn, std::min( qty, ammo_capacity() ) );
+                const item temp_ammo( ammo_default(), calendar::turn, std::min( qty, ammo_capacity( ammo_type ) ) );
                 put_in( temp_ammo, item_pocket::pocket_type::MAGAZINE );
             }
         }
@@ -599,7 +600,7 @@ item &item::ammo_set( const itype_id &ammo, int qty )
 
     if( is_magazine() ) {
         ammo_unset();
-        item set_ammo( ammo, calendar::turn, std::min( qty, ammo_capacity() ) );
+        item set_ammo( ammo, calendar::turn, std::min( qty, ammo_capacity( ammo_type ) ) );
         if( has_flag( flag_NO_UNLOAD ) ) {
             set_ammo.item_tags.insert( "NO_DROP" );
             set_ammo.item_tags.insert( "IRREMOVABLE" );
@@ -607,7 +608,7 @@ item &item::ammo_set( const itype_id &ammo, int qty )
         put_in( set_ammo, item_pocket::pocket_type::MAGAZINE );
 
     } else if( magazine_integral() ) {
-        const item temp_ammo( atype, calendar::turn, std::min( qty, ammo_capacity() ) );
+        const item temp_ammo( atype, calendar::turn, std::min( qty, ammo_capacity( ammo_type ) ) );
         put_in( temp_ammo, item_pocket::pocket_type::MAGAZINE );
 
     } else {
@@ -1852,10 +1853,10 @@ void item::magazine_info( std::vector<iteminfo> &info, const iteminfo_query *par
     if( parts->test( iteminfo_parts::MAGAZINE_CAPACITY ) ) {
         for( const ammotype &at : ammo_types() ) {
             const std::string fmt = string_format( ngettext( "<num> round of %s",
-                                                   "<num> rounds of %s", ammo_capacity() ),
+                                                   "<num> rounds of %s", ammo_capacity( at ) ),
                                                    at->name() );
             info.emplace_back( "MAGAZINE", _( "Capacity: " ), fmt, iteminfo::no_flags,
-                               ammo_capacity() );
+                               ammo_capacity( at ) );
         }
     }
     if( parts->test( iteminfo_parts::MAGAZINE_RELOAD ) ) {
@@ -2124,13 +2125,13 @@ void item::gun_info( const item *mod, std::vector<iteminfo> &info, const iteminf
                                string_format( "<stat>%s</stat>",
                                               mod->magazine_current()->tname() ) );
         }
-        if( mod->ammo_capacity() && parts->test( iteminfo_parts::GUN_CAPACITY ) ) {
+        if( !mod->ammo_types().empty() && parts->test( iteminfo_parts::GUN_CAPACITY ) ) {
             for( const ammotype &at : mod->ammo_types() ) {
                 const std::string fmt = string_format( ngettext( "<num> round of %s",
                                                        "<num> rounds of %s",
-                                                       mod->ammo_capacity() ), at->name() );
+                                                       mod->ammo_capacity( at ) ), at->name() );
                 info.emplace_back( "GUN", _( "Capacity: " ), fmt, iteminfo::no_flags,
-                                   mod->ammo_capacity() );
+                                   mod->ammo_capacity( at ) );
             }
         }
     } else if( parts->test( iteminfo_parts::GUN_TYPE ) ) {
@@ -2922,7 +2923,7 @@ void item::tool_info( std::vector<iteminfo> &info, const iteminfo_query *parts, 
     }
 
     insert_separation_line( info );
-    if( ammo_capacity() != 0 && parts->test( iteminfo_parts::TOOL_CHARGES ) ) {
+    if( !ammo_types().empty() && parts->test( iteminfo_parts::TOOL_CHARGES ) ) {
         info.emplace_back( "TOOL", string_format( _( "<bold>Charges</bold>: %d" ),
                            ammo_remaining() ) );
     }
@@ -2940,24 +2941,18 @@ void item::tool_info( std::vector<iteminfo> &info, const iteminfo_query *parts, 
                 return item::nname( id );
             } ) );
         }
-    } else if( ammo_capacity() != 0 && parts->test( iteminfo_parts::TOOL_CAPACITY ) ) {
+    } else if( !ammo_types().empty() && parts->test( iteminfo_parts::TOOL_CAPACITY ) ) {
         std::string tmp;
         bool bionic_tool = has_flag( flag_USES_BIONIC_POWER );
         if( !ammo_types().empty() ) {
-            //~ "%s" is ammunition type. This types can't be plural.
-            tmp = ngettext( "Maximum <num> charge of %s.", "Maximum <num> charges of %s.",
-                            ammo_capacity() );
-            tmp = string_format( tmp, enumerate_as_string( ammo_types().begin(),
-            ammo_types().end(), []( const ammotype & at ) {
-                return at->name();
-            }, enumeration_conjunction::none ) );
+            for( const ammotype &at : ammo_types() ) {
+                //~ "%s" is ammunition type. This types can't be plural.
+                info.emplace_back( "TOOL", string_format(
+                                       ngettext( "Maximum <num> charge of %s.", "Maximum <num> charges of %s.",
+                                                 ammo_capacity( at ) ), at->name() ) );
+            }
 
             // No need to display max charges, since charges are always equal to bionic power
-        } else if( !bionic_tool ) {
-            tmp = ngettext( "Maximum <num> charge.", "Maximum <num> charges.", ammo_capacity() );
-        }
-        if( !bionic_tool ) {
-            info.emplace_back( "TOOL", "", tmp, iteminfo::no_flags, ammo_capacity() );
         }
     }
 }
@@ -4484,16 +4479,26 @@ std::string item::display_name( unsigned int quantity ) const
     if( is_book() && get_chapters() > 0 ) {
         // a book which has remaining unread chapters
         amount = get_remaining_chapters( g->u );
-    } else if( ammo_capacity() > 0 ) {
+    } else if( !ammo_types().empty() ) {
         // anything that can be reloaded including tools, magazines, guns and auxiliary gunmods
         // but excluding bows etc., which have ammo, but can't be reloaded
         amount = ammo_remaining();
-        max_amount = ammo_capacity();
+        const itype *adata = ammo_data();
+        if( adata ) {
+            max_amount = ammo_capacity( adata->ammo->type );
+        } else {
+            max_amount = ammo_capacity( item_controller->find_template( ammo_default() )->ammo->type );
+        }
         show_amt = !has_flag( flag_RELOAD_AND_SHOOT );
     } else if( count_by_charges() && !has_infinite_charges() ) {
         // A chargeable item
         amount = charges;
-        max_amount = ammo_capacity();
+        const itype *adata = ammo_data();
+        if( adata ) {
+            max_amount = ammo_capacity( adata->ammo->type );
+        } else if( ammo_default() != "NULL" ) {
+            max_amount = ammo_capacity( item_controller->find_template( ammo_default() )->ammo->type );
+        }
     } else if( is_battery() ) {
         show_amt = true;
         amount = to_joule( energy_remaining() );
@@ -4574,7 +4579,7 @@ int item::price( bool practical ) const
             // items with integral magazines may contain ammunition which can affect the price
             child += item( e->ammo_data(), calendar::turn, e->charges ).price( practical );
 
-        } else if( e->is_tool() && e->ammo_types().empty() && e->ammo_capacity() ) {
+        } else if( e->is_tool() ) {
             // if tool has no ammo (e.g. spray can) reduce price proportional to remaining charges
             child *= e->ammo_remaining() / static_cast<double>( std::max( e->type->charges_default(), 1 ) );
         }
@@ -6431,7 +6436,7 @@ bool item::is_reloadable_helper( const itype_id &ammo, bool now ) const
                 }
             }
         }
-        return now ? ( ammo_remaining() < ammo_capacity() ) : true;
+        return now ? ( ammo_remaining() < ammo_capacity( find_type( ammo )->ammo->type ) ) : true;
     } else {
         return ammo.empty() ? true : magazine_compatible().count( ammo );
     }
@@ -6915,7 +6920,7 @@ int item::ammo_remaining() const
             return charges;
         }
 
-        if( type->tool->ammo_id.empty() ||
+        if( ammo_types().empty() ||
             !contents.has_pocket_type( item_pocket::pocket_type::MAGAZINE ) ) {
             // includes auxiliary gunmods
             if( has_flag( flag_USES_BIONIC_POWER ) ) {
@@ -6945,42 +6950,30 @@ int item::ammo_remaining() const
     return 0;
 }
 
-int item::ammo_capacity() const
+int item::remaining_ammo_capacity() const
 {
-    return ammo_capacity( false );
+    if( ammo_types().empty() ) {
+        return 0;
+    }
+
+    const itype *loaded_ammo = ammo_data();
+    if( loaded_ammo == nullptr ) {
+        return ammo_capacity( item::find_type( ammo_default() )->ammo->type ) - ammo_remaining();
+    } else {
+        return ammo_capacity( loaded_ammo->ammo->type ) - ammo_remaining();
+    }
 }
 
-int item::ammo_capacity( bool potential_capacity ) const
+int item::ammo_capacity( const ammotype &ammo ) const
 {
     int res = 0;
 
     const item *mag = magazine_current();
     if( mag ) {
-        return mag->ammo_capacity();
+        return mag->ammo_capacity( ammo );
     }
 
-    if( is_tool() ) {
-        res = type->tool->max_charges;
-        if( res == 0 && magazine_default() != "null" && potential_capacity ) {
-            res = find_type( magazine_default() )->magazine->capacity;
-        }
-        for( const item *e : toolmods() ) {
-            res *= e->type->mod->capacity_multiplier;
-        }
-    }
-
-    if( is_gun() ) {
-        res = type->gun->clip;
-        for( const item *e : gunmods() ) {
-            res *= e->type->mod->capacity_multiplier;
-        }
-    }
-
-    if( is_magazine() ) {
-        res = type->magazine->capacity;
-    }
-
-    return res;
+    return contents.ammo_capacity( ammo );
 }
 
 int item::ammo_required() const
@@ -7098,7 +7091,7 @@ itype_id item::ammo_current() const
     return ammo ? ammo->get_id() : "null";
 }
 
-const std::set<ammotype> &item::ammo_types( bool conversion ) const
+std::set<ammotype> item::ammo_types( bool conversion ) const
 {
     if( conversion ) {
         const std::vector<const item *> &mods = is_gun() ? gunmods() : toolmods();
@@ -7109,16 +7102,7 @@ const std::set<ammotype> &item::ammo_types( bool conversion ) const
         }
     }
 
-    if( is_gun() ) {
-        return type->gun->ammo;
-    } else if( is_tool() ) {
-        return type->tool->ammo_id;
-    } else if( is_magazine() ) {
-        return type->magazine->type;
-    }
-
-    static std::set<ammotype> atypes = {};
-    return atypes;
+    return contents.ammo_types();
 }
 
 ammotype item::ammo_type() const
@@ -7570,7 +7554,7 @@ void item::reload_option::qty( int val )
     // This gets rounded up to 1 later.
     int remaining_capacity = target->is_watertight_container() ?
                              target->get_remaining_capacity_for_liquid( ammo_obj, true ) :
-                             target->ammo_capacity() - target->ammo_remaining();
+                             target->ammo_capacity( ammo_obj.ammo_data()->ammo->type ) - target->ammo_remaining();
     if( target->has_flag( flag_RELOAD_ONE ) && !ammo->has_flag( flag_SPEEDLOADER ) ) {
         remaining_capacity = 1;
     }
@@ -7638,7 +7622,7 @@ bool item::reload( player &u, item_location ammo, int qty )
     // limit quantity of ammo loaded to remaining capacity
     int limit = is_watertight_container()
                 ? get_remaining_capacity_for_liquid( *ammo )
-                : ammo_capacity() - ammo_remaining();
+                : ammo_capacity( ammo->ammo_data()->ammo->type ) - ammo_remaining();
 
     if( ammo->ammo_type() == ammo_plutonium ) {
         limit = limit / PLUTONIUM_CHARGES + ( limit % PLUTONIUM_CHARGES != 0 );
@@ -7713,7 +7697,7 @@ bool item::reload( player &u, item_location ammo, int qty )
 
             // any excess is wasted rather than overfilling the item
             item plut( *ammo );
-            plut.charges = std::min( qty * PLUTONIUM_CHARGES, ammo_capacity() );
+            plut.charges = std::min( qty * PLUTONIUM_CHARGES, ammo_capacity( ammo->ammo_type() ) );
             put_in( plut, item_pocket::pocket_type::MAGAZINE );
         } else {
             curammo = ammo->type;
@@ -7901,8 +7885,9 @@ int item::getlight_emit() const
     }
     if( has_flag( flag_CHARGEDIM ) && is_tool() && !has_flag( flag_USE_UPS ) ) {
         // Falloff starts at 1/5 total charge and scales linearly from there to 0.
-        if( ammo_capacity() && ammo_remaining() < ( ammo_capacity() / 5 ) ) {
-            lumint *= ammo_remaining() * 5.0 / ammo_capacity();
+        const ammotype &loaded_ammo = ammo_data()->ammo->type;
+        if( ammo_capacity( loaded_ammo ) && ammo_remaining() < ( ammo_capacity( loaded_ammo ) / 5 ) ) {
+            lumint *= ammo_remaining() * 5.0 / ammo_capacity( loaded_ammo );
         }
     }
     return lumint;
@@ -9600,14 +9585,11 @@ bool item::is_reloadable() const
     if( has_flag( flag_NO_RELOAD ) && !has_flag( flag_VEHICLE ) ) {
         return false; // turrets ignore NO_RELOAD flag
 
-    } else if( !is_gun() && !is_tool() && !is_magazine() ) {
-        return false;
-
-    } else if( ammo_types().empty() ) {
-        return false;
+    } else if( contents.has_pocket_type( item_pocket::pocket_type::MAGAZINE ) ) {
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 std::string item::type_name( unsigned int quantity ) const
