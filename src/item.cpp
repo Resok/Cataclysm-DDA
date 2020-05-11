@@ -4477,6 +4477,16 @@ std::string item::display_name( unsigned int quantity ) const
     if( is_book() && get_chapters() > 0 ) {
         // a book which has remaining unread chapters
         amount = get_remaining_chapters( g->u );
+    } else if( magazine_current() ) {
+        const item *mag = magazine_current();
+        amount = ammo_remaining();
+        const itype *adata = mag->ammo_data();
+        if( adata ) {
+            max_amount = mag->ammo_capacity( adata->ammo->type );
+        } else {
+            max_amount = mag->ammo_capacity( item_controller->find_template( ammo_default() )->ammo->type );
+        }
+
     } else if( !ammo_types().empty() ) {
         // anything that can be reloaded including tools, magazines, guns and auxiliary gunmods
         // but excluding bows etc., which have ammo, but can't be reloaded
@@ -4504,7 +4514,7 @@ std::string item::display_name( unsigned int quantity ) const
     }
 
     std::string ammotext;
-    if( !is_ammo() && ( ( is_gun() && ammo_required() ) || is_magazine() ) &&
+    if( !is_ammo() && ( is_gun() || is_magazine() ) &&
         get_option<bool>( "AMMO_IN_NAMES" ) ) {
         if( ammo_current() != "null" ) {
             ammotext = find_type( ammo_current() )->ammo->type->name();
