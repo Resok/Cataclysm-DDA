@@ -2207,44 +2207,41 @@ void Item_factory::check_and_create_magazine_pockets( itype &def )
         // we assume they're good to go, or error elsewhere
         return;
     }
-    if( def.magazine ) {
-        pocket_data mag_data;
-        mag_data.type = item_pocket::pocket_type::MAGAZINE;
-        for( const ammotype &amtype : def.magazine->type ) {
-            mag_data.ammo_restriction.emplace( amtype, def.magazine->capacity );
-        }
-        mag_data.fire_protection = def.magazine->protects_contents;
-        mag_data.volume_capacity = 200_liter;
-        mag_data.max_contains_weight = 400_kilogram;
-        mag_data.max_item_length = 2_km;
-        mag_data.rigid = true;
-        mag_data.watertight = true;
-        for( const ammotype &ammo : def.magazine->type ) {
-            mag_data.ammo_restriction.emplace( ammo, def.magazine->capacity );
-        }
-        def.pockets.push_back( mag_data );
-        return;
-    } else if( def.gun || !def.magazines.empty() ) {
-        pocket_data mag_data;
-        mag_data.type = item_pocket::pocket_type::MAGAZINE;
-        // only one magazine in a pocket, for now
-        mag_data.holster = true;
-        // guns are, in code terms, nonrigid objects with optional magazine_wells.
+    pocket_data mag_data;
+    mag_data.holster = true;
+    mag_data.max_contains_volume = 200_liter;
+    mag_data.max_contains_weight = 400_kilogram;
+    mag_data.max_item_length = 2_km;
+    mag_data.watertight = true;
+    if( !def.magazines.empty() ) {
+        mag_data.type = item_pocket::pocket_type::MAGAZINE_WELL;
         mag_data.rigid = false;
-        mag_data.watertight = true;
-        mag_data.volume_capacity = 200_liter;
-        mag_data.max_contains_weight = 400_kilogram;
-        mag_data.max_item_length = 2_km;
-        if( def.gun ) {
-            for( const ammotype &ammo : def.gun->ammo ) {
-                mag_data.ammo_restriction.emplace( ammo, def.gun->clip );
+        for( const std::pair<ammotype, std::set<std::string>> &mag_pair : def.magazines ) {
+            for( const std::string &mag_type : mag_pair.second ) {
+                mag_data.item_id_restriction.insert( mag_type );
             }
         }
-        // the magazine pocket does not use can_contain like normal CONTAINER pockets
-        // so we don't have to worry about having random items be put into the mag
-        def.pockets.push_back( mag_data );
-        return;
+    } else {
+        mag_data.type = item_pocket::pocket_type::MAGAZINE;
+        mag_data.rigid = true;
+        if( def.magazine ) {
+            for( const ammotype &amtype : def.magazine->type ) {
+                mag_data.ammo_restriction.emplace( amtype, def.magazine->capacity );
+            }
+            mag_data.fire_protection = def.magazine->protects_contents;
+        }
+        if( def.gun ) {
+            for( const ammotype &amtype : def.gun->ammo ) {
+                mag_data.ammo_restriction.emplace( amtype, def.gun->clip );
+            }
+        }
+        if( def.tool ) {
+            for( const ammotype &amtype : def.tool->ammo_id ) {
+                mag_data.ammo_restriction.emplace( amtype, def.tool->max_charges );
+            }
+        }
     }
+    def.pockets.push_back( mag_data );
 }
 
 static bool has_pocket_type( const std::vector<pocket_data> &data, item_pocket::pocket_type pk )

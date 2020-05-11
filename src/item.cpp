@@ -593,8 +593,11 @@ item &item::ammo_set( const itype_id &ammo, int qty )
 
     // check ammo is valid for the item
     const itype *atype = item_controller->find_template( ammo );
-    if( !atype->ammo || !ammo_types().count( atype->ammo->type ) ) {
+    if( atype->ammo && !ammo_types().count( atype->ammo->type ) ) {
         debugmsg( "Tried to set invalid ammo of %s for %s", atype->nname( qty ), tname() );
+        return *this;
+    } else if( !magazine_compatible().count( atype->get_id() ) ) {
+        debugmsg( "Tried to set invalid magazine of %s for %s", atype->nname( qty ), tname() );
         return *this;
     }
 
@@ -606,10 +609,6 @@ item &item::ammo_set( const itype_id &ammo, int qty )
             set_ammo.item_tags.insert( "IRREMOVABLE" );
         }
         put_in( set_ammo, item_pocket::pocket_type::MAGAZINE );
-
-    } else if( magazine_integral() ) {
-        const item temp_ammo( atype, calendar::turn, std::min( qty, ammo_capacity( ammo_type ) ) );
-        put_in( temp_ammo, item_pocket::pocket_type::MAGAZINE );
 
     } else {
         if( !magazine_current() ) {
@@ -641,7 +640,7 @@ item &item::ammo_set( const itype_id &ammo, int qty )
                     }
                 }
             }
-            put_in( item( mag ), item_pocket::pocket_type::MAGAZINE );
+            put_in( item( mag ), item_pocket::pocket_type::MAGAZINE_WELL );
         }
         item *mag_cur = magazine_current();
         if( mag_cur != nullptr ) {
@@ -1859,7 +1858,7 @@ void item::magazine_info( std::vector<iteminfo> &info, const iteminfo_query *par
                                ammo_capacity( at ) );
         }
     }
-    if( parts->test( iteminfo_parts::MAGAZINE_RELOAD ) ) {
+    if( parts->test( iteminfo_parts::MAGAZINE_RELOAD ) && type->magazine ) {
         info.emplace_back( "MAGAZINE", _( "Reload time: " ), _( "<num> moves per round" ),
                            iteminfo::lower_is_better, type->magazine->reload_time );
     }
@@ -4509,7 +4508,7 @@ std::string item::display_name( unsigned int quantity ) const
     if( ( ( is_gun() && ammo_required() ) || is_magazine() ) && get_option<bool>( "AMMO_IN_NAMES" ) ) {
         if( ammo_current() != "null" ) {
             ammotext = find_type( ammo_current() )->ammo->type->name();
-        } else {
+        } else if( !ammo_types().empty() ) {
             ammotext = ammotype( *ammo_types().begin() )->name();
         }
     }
@@ -4659,7 +4658,7 @@ units::mass item::weight( bool, bool integral ) const
     }
 
     // if this is an ammo belt add the weight of any implicitly contained linkages
-    if( is_magazine() && type->magazine->linkage ) {
+    if( type->magazine && type->magazine->linkage ) {
         item links( *type->magazine->linkage );
         links.charges = ammo_remaining();
         ret += links.weight();
@@ -6110,7 +6109,7 @@ bool item::is_bionic() const
 
 bool item::is_magazine() const
 {
-    return !!type->magazine;
+    return !!type->magazine || contents.has_pocket_type( item_pocket::pocket_type::MAGAZINE );
 }
 
 bool item::is_battery() const
@@ -7011,22 +7010,8 @@ int item::ammo_consume( int qty, const tripoint &pos )
         return 0;
     }
 
-    item *mag = magazine_current();
-    if( mag ) {
-        const int res = mag->ammo_consume( qty, pos );
-        if( res && ammo_remaining() == 0 ) {
-            if( mag->has_flag( flag_MAG_DESTROY ) ) {
-                remove_item( *mag );
-            } else if( mag->has_flag( flag_MAG_EJECT ) ) {
-                g->m.add_item( pos, *mag );
-                remove_item( *mag );
-            }
-        }
-        return res;
-    }
-
-    if( is_magazine() ) {
-        return contents.ammo_consume( qty );
+    if( is_magazine() || contents.has_pocket_type( item_pocket::pocket_type::MAGAZINE_WELL ) ) {
+        return contents.ammo_consume( qty, pos );
 
     } else if( is_tool() || is_gun() ) {
         if( !contents.has_pocket_type( item_pocket::pocket_type::MAGAZINE ) ||
@@ -7040,15 +7025,6 @@ int item::ammo_consume( int qty, const tripoint &pos )
             if( charges == 0 ) {
                 curammo = nullptr;
             }
-            return qty;
-        } else {
-            for( item *it : contents.all_items_top( item_pocket::pocket_type::MAGAZINE ) ) {
-                qty = std::min( qty, it->charges );
-                it->charges -= qty;
-            }
-
-            on_contents_changed();
-
             return qty;
         }
     }
@@ -7174,22 +7150,12 @@ std::string item::ammo_sort_name() const
 
 bool item::magazine_integral() const
 {
-    if( is_gun() && type->gun->clip > 0 ) {
-        return true;
-    }
-    for( const item *m : is_gun() ? gunmods() : toolmods() ) {
-        if( !m->type->mod->magazine_adaptor.empty() ) {
-            return false;
-        }
-    }
-
-    // We have an integral magazine if we're a gun with an ammo capacity (clip) or we have no magazines.
-    return ( is_gun() && type->gun->clip > 0 ) || type->magazines.empty();
+    return contents.has_pocket_type( item_pocket::pocket_type::MAGAZINE );
 }
 
 itype_id item::magazine_default( bool conversion ) const
 {
-    if( !ammo_types( conversion ).empty() ) {
+    if( !magazine_compatible( conversion ).empty() ) {
         if( conversion ) {
             for( const item *m : is_gun() ? gunmods() : toolmods() ) {
                 if( !m->type->mod->magazine_adaptor.empty() ) {
@@ -7200,10 +7166,13 @@ itype_id item::magazine_default( bool conversion ) const
                 }
             }
         }
-        auto mag = type->magazine_default.find( ammotype( *ammo_types( conversion ).begin() ) );
-        if( mag != type->magazine_default.end() ) {
-            return mag->second;
+        if( !ammo_types( conversion ).empty() ) {
+            auto mag = type->magazine_default.find( ammotype( *ammo_types( conversion ).begin() ) );
+            if( mag != type->magazine_default.end() ) {
+                return mag->second;
+            }
         }
+        return *magazine_compatible( conversion ).begin();
     }
     return "null";
 }
@@ -7225,13 +7194,7 @@ std::set<itype_id> item::magazine_compatible( bool conversion ) const
         }
     }
 
-    for( const ammotype &atype : ammo_types( conversion ) ) {
-        if( type->magazines.count( atype ) ) {
-            std::set<itype_id> magazines_for_atype = type->magazines.find( atype )->second;
-            mags.insert( magazines_for_atype.begin(), magazines_for_atype.end() );
-        }
-    }
-    return mags;
+    return contents.magazine_compatible();
 }
 
 item *item::magazine_current()
@@ -7643,46 +7606,6 @@ bool item::reload( player &u, item_location ammo, int qty )
             }
         }
 
-        item to_reload = *ammo;
-        to_reload.charges = qty;
-        ammo->charges -= qty;
-        bool merged = false;
-        for( item *it : contents.all_items_top() ) {
-            if( it->merge_charges( to_reload ) ) {
-                merged = true;
-                break;
-            }
-        }
-        if( !merged ) {
-            put_in( to_reload, item_pocket::pocket_type::MAGAZINE );
-        }
-    } else if( is_watertight_container() ) {
-        if( !ammo->made_of_from_type( LIQUID ) ) {
-            debugmsg( "Tried to reload liquid container with non-liquid." );
-            return false;
-        }
-        if( container ) {
-            container->on_contents_changed();
-        }
-        fill_with( *ammo->type, qty );
-    } else if( !magazine_integral() ) {
-        // if we already have a magazine loaded prompt to eject it
-        if( magazine_current() ) {
-            //~ %1$s: magazine name, %2$s: weapon name
-            std::string prompt = string_format( pgettext( "magazine", "Eject %1$s from %2$s?" ),
-                                                magazine_current()->tname(), tname() );
-
-            // eject magazine to player inventory
-            u.i_add( *magazine_current() );
-
-            remove_item( *magazine_current() );
-        }
-
-        put_in( *ammo, item_pocket::pocket_type::MAGAZINE );
-        ammo.remove_item();
-        return true;
-
-    } else {
         if( ammo->has_flag( flag_SPEEDLOADER ) ) {
             // sets curammo to one of the ammo types contained
             curammo = ammo->contents.first_ammo().type;
@@ -7697,7 +7620,7 @@ bool item::reload( player &u, item_location ammo, int qty )
 
             // any excess is wasted rather than overfilling the item
             item plut( *ammo );
-            plut.charges = std::min( qty * PLUTONIUM_CHARGES, ammo_capacity( ammo->ammo_type() ) );
+            plut.charges = std::min( qty * PLUTONIUM_CHARGES, ammo_capacity( ammotype( "plut_cell" ) ) );
             put_in( plut, item_pocket::pocket_type::MAGAZINE );
         } else {
             curammo = ammo->type;
@@ -7707,6 +7630,31 @@ bool item::reload( player &u, item_location ammo, int qty )
             item_copy.charges = qty;
             put_in( item_copy, item_pocket::pocket_type::MAGAZINE );
         }
+    } else if( is_watertight_container() ) {
+        if( !ammo->made_of_from_type( LIQUID ) ) {
+            debugmsg( "Tried to reload liquid container with non-liquid." );
+            return false;
+        }
+        if( container ) {
+            container->on_contents_changed();
+        }
+        fill_with( *ammo->type, qty );
+    } else {
+        // if we already have a magazine loaded prompt to eject it
+        if( magazine_current() ) {
+            //~ %1$s: magazine name, %2$s: weapon name
+            std::string prompt = string_format( pgettext( "magazine", "Eject %1$s from %2$s?" ),
+                                                magazine_current()->tname(), tname() );
+
+            // eject magazine to player inventory
+            u.i_add( *magazine_current() );
+
+            remove_item( *magazine_current() );
+        }
+
+        put_in( *ammo, item_pocket::pocket_type::MAGAZINE_WELL );
+        ammo.remove_item();
+        return true;
     }
 
     if( ammo->charges == 0 && !ammo->has_flag( flag_SPEEDLOADER ) ) {
@@ -9585,7 +9533,7 @@ bool item::is_reloadable() const
     if( has_flag( flag_NO_RELOAD ) && !has_flag( flag_VEHICLE ) ) {
         return false; // turrets ignore NO_RELOAD flag
 
-    } else if( contents.has_pocket_type( item_pocket::pocket_type::MAGAZINE ) ) {
+    } else if( is_magazine() || contents.has_pocket_type( item_pocket::pocket_type::MAGAZINE_WELL ) ) {
         return true;
     }
 

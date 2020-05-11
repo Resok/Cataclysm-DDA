@@ -6,6 +6,7 @@
 
 #include "enums.h"
 #include "enum_traits.h"
+#include "flat_set.h"
 #include "optional.h"
 #include "type_id.h"
 #include "ret_val.h"
@@ -34,6 +35,7 @@ class item_pocket
         enum pocket_type {
             CONTAINER,
             MAGAZINE,
+            MAGAZINE_WELL, //holds magazines
             MOD, // the gunmods or toolmods
             CORPSE, // the "corpse" pocket - bionics embedded in a corpse
             SOFTWARE, // software put into usb or some such
@@ -79,6 +81,10 @@ class item_pocket
         bool rigid() const;
         bool watertight() const;
 
+        // is this pocket one of the standard types?
+        // exceptions are MOD, CORPSE, SOFTWARE, MIGRATION, etc.
+        bool is_standard_type() const;
+
         std::list<item *> all_items_top();
         std::list<const item *> all_items_top() const;
         std::list<item *> all_items_ptr( pocket_type pk_type );
@@ -123,6 +129,7 @@ class item_pocket
         std::vector<item *> gunmods();
         // returns a list of pointers of all gunmods in the pocket
         std::vector<const item *> gunmods() const;
+        cata::flat_set<itype_id> item_type_restrictions() const;
         item *magazine_current();
         int ammo_consume( int qty );
         // returns all allowable ammotypes
@@ -299,6 +306,9 @@ class pocket_data
         // items stored are restricted to these ammo types:
         // the pocket can only contain one of them since the amount is also defined for each ammotype
         std::map<ammotype, int> ammo_restriction;
+        // items stored are restricted to these item ids.
+        // this takes precedence over the other two restrictions
+        cata::flat_set<itype_id> item_id_restriction;
         // container's size and encumbrance does not change based on contents.
         bool rigid = false;
 

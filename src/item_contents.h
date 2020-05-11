@@ -79,6 +79,9 @@ class item_contents
         std::vector<item *> gunmods();
         /** gets all gunmods in the item */
         std::vector<const item *> gunmods() const;
+        // all magazines compatible with any pockets.
+        // this only checks MAGAZINE_WELL
+        std::set<itype_id> magazine_compatible() const;
         /**
          * This function is to aid migration to using nested containers.
          * The call sites of this function need to be updated to search the
@@ -146,7 +149,7 @@ class item_contents
         // heats up the contents if they have temperature
         void heat_up();
         // returns qty - need
-        int ammo_consume( int qty );
+        int ammo_consume( int qty, const tripoint &pos );
         item *magazine_current();
         std::set<ammotype> ammo_types() const;
         int ammo_capacity( const ammotype &ammo ) const;
