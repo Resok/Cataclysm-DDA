@@ -2507,7 +2507,7 @@ bool player::can_reload( const item &it, const itype_id &ammo ) const
     if( ammo.empty() ) {
         // if no ammo is passed, we just want to know if the player has an ammo for this item
         return has_item_with( [&it]( const item & ammo ) {
-            return it.ammo_types().count( ammo.ammo_type() ) > 0;
+            return it.can_reload_with( ammo.typeId() );
         } );
     }
 
@@ -2956,7 +2956,7 @@ bool player::unload( item_location &loc )
     }
 
     // Next check for any reasons why the item cannot be unloaded
-    if( target->ammo_types().empty() ) {
+    if( target->ammo_types().empty() && target->magazine_compatible().empty() ) {
         add_msg( m_info, _( "You can't unload a %s!" ), target->tname() );
         return false;
     }
