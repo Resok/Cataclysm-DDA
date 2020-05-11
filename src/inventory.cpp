@@ -543,8 +543,8 @@ void inventory::form_from_map( map &m, std::vector<tripoint> pts, const Characte
             it.item_tags.insert( "PSEUDO" );
             return it;
         };
+        int veh_battery = veh->fuel_left( "battery", true );
         if( kpart ) {
-            int veh_battery = veh->fuel_left( "battery", true );
             item hotplate = item_with_battery( "hotplate", veh_battery );
             add_item( hotplate );
 
@@ -556,14 +556,12 @@ void inventory::form_from_map( map &m, std::vector<tripoint> pts, const Characte
             add_item( pan );
         }
         if( weldpart ) {
-            int veh_battery = veh->fuel_left( "battery", true );
             item welder = item_with_battery( "welder", veh_battery );
             add_item( welder );
             item soldering_iron = item_with_battery( "soldering_iron", veh_battery );
             add_item( soldering_iron );
         }
         if( craftpart ) {
-            int veh_battery = veh->fuel_left( "battery", true );
             item vac_sealer = item_with_battery( "vac_sealer", veh_battery );
             add_item( vac_sealer );
 
@@ -577,17 +575,14 @@ void inventory::form_from_map( map &m, std::vector<tripoint> pts, const Characte
             add_item( press );
         }
         if( forgepart ) {
-            int veh_battery = veh->fuel_left( "battery", true );
             item forge = item_with_battery( "forge", veh_battery );
             add_item( forge );
         }
         if( kilnpart ) {
-            int veh_battery = veh->fuel_left( "battery", true );
             item kiln = item_with_battery( "kiln", veh_battery );
             add_item( kiln );
         }
         if( chempart ) {
-            int veh_battery = veh->fuel_left( "battery", true );
             item chemistry_set = item_with_battery( "chemistry_set", veh_battery );
             add_item( chemistry_set );
 
