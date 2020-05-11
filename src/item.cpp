@@ -1967,7 +1967,14 @@ void item::gun_info( const item *mod, std::vector<iteminfo> &info, const iteminf
     item tmp;
     if( mod->ammo_required() && !mod->ammo_remaining() ) {
         tmp = *mod;
-        tmp.ammo_set( mod->magazine_current() ? tmp.common_ammo_default() : tmp.ammo_default() );
+        itype_id default_ammo = mod->magazine_current() ? tmp.common_ammo_default() : tmp.ammo_default();
+        if( default_ammo != "NULL" ) {
+            tmp.ammo_set( default_ammo );
+        } else if( tmp.magazine_default() != "null" ) {
+            item tmp_mag( tmp.magazine_default() );
+            tmp_mag.ammo_set( tmp_mag.ammo_default() );
+            tmp.put_in( tmp_mag, item_pocket::pocket_type::MAGAZINE_WELL );
+        }
         loaded_mod = &tmp;
         if( loaded_mod->typeId() == "none" || loaded_mod == nullptr ||
             loaded_mod->ammo_data() == nullptr ) {
@@ -6112,8 +6119,14 @@ int item::get_reload_time() const
     if( !is_gun() && !is_magazine() ) {
         return 0;
     }
-
-    int reload_time = is_gun() ? type->gun->reload_time : type->magazine->reload_time;
+    int reload_time = 0;
+    if( is_gun() ) {
+        reload_time = type->gun->reload_time;
+    } else if( type->magazine ) {
+        reload_time = type->magazine->reload_time;
+    } else {
+        reload_time = INVENTORY_HANDLING_PENALTY;
+    }
     for( const item *mod : gunmods() ) {
         reload_time = static_cast<int>( reload_time * ( 100 + mod->type->gunmod->reload_modifier ) / 100 );
     }
