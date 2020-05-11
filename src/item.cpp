@@ -2963,8 +2963,6 @@ void item::tool_info( std::vector<iteminfo> &info, const iteminfo_query *parts, 
             } ) );
         }
     } else if( !ammo_types().empty() && parts->test( iteminfo_parts::TOOL_CAPACITY ) ) {
-        std::string tmp;
-        bool bionic_tool = has_flag( flag_USES_BIONIC_POWER );
         if( !ammo_types().empty() ) {
             for( const ammotype &at : ammo_types() ) {
                 //~ "%s" is ammunition type. This types can't be plural.
@@ -7007,8 +7005,6 @@ int item::remaining_ammo_capacity() const
 
 int item::ammo_capacity( const ammotype &ammo ) const
 {
-    int res = 0;
-
     const item *mag = magazine_current();
     if( mag ) {
         return mag->ammo_capacity( ammo );
