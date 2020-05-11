@@ -4530,7 +4530,7 @@ std::string item::display_name( unsigned int quantity ) const
     }
 
     std::string ammotext;
-    if( !is_ammo() && ( is_gun() || is_magazine() ) &&
+    if( !is_ammo() && ( ( is_gun() && ammo_required() ) || is_magazine() ) &&
         get_option<bool>( "AMMO_IN_NAMES" ) ) {
         if( ammo_current() != "null" ) {
             ammotext = find_type( ammo_current() )->ammo->type->name();
@@ -7011,7 +7011,7 @@ int item::ammo_required() const
     }
 
     if( is_gun() ) {
-        if( ammo_types().empty() ) {
+        if( type->gun->ammo.empty() ) {
             return 0;
         } else if( has_flag( flag_FIRE_100 ) ) {
             return 100;

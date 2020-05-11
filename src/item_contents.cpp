@@ -367,6 +367,7 @@ int item_contents::ammo_consume( int qty, const tripoint &pos )
                     pocket.remove_item( mag );
                 }
             }
+            qty -= res;
         } else if( pocket.is_type( item_pocket::pocket_type::MAGAZINE ) ) {
 
             qty = pocket.ammo_consume( qty );
