@@ -400,8 +400,7 @@
     "weight": "182 g",
     "volume": "750 ml",
     "charges_per_use": 1,
-    "ammo": "battery",
-    "pocket_data": [ { "pocket_type":"MAGAZINE","ammo_restriction": {"battery":1}}],
+    "pocket_data": [ { "pocket_type":"MAGAZINE" } ],
     "use_action": {
       "type": "transform",
       "msg": "You activate your %s.",
