@@ -593,11 +593,9 @@ item &item::ammo_set( const itype_id &ammo, int qty )
 
     // check ammo is valid for the item
     const itype *atype = item_controller->find_template( ammo );
-    if( atype->ammo && !ammo_types().count( atype->ammo->type ) ) {
+    if( atype->ammo && ammo_types().count( atype->ammo->type ) == 0 &&
+        !magazine_compatible().count( atype->get_id() ) ) {
         debugmsg( "Tried to set invalid ammo of %s for %s", atype->nname( qty ), tname() );
-        return *this;
-    } else if( !magazine_compatible().count( atype->get_id() ) ) {
-        debugmsg( "Tried to set invalid magazine of %s for %s", atype->nname( qty ), tname() );
         return *this;
     }
 
@@ -2134,8 +2132,9 @@ void item::gun_info( const item *mod, std::vector<iteminfo> &info, const iteminf
             }
         }
     } else if( parts->test( iteminfo_parts::GUN_TYPE ) ) {
-        info.emplace_back( "GUN", _( "Type: " ), enumerate_as_string( mod->ammo_types().begin(),
-        mod->ammo_types().end(), []( const ammotype & at ) {
+        const std::set<ammotype> types_of_ammo = mod->ammo_types();
+        info.emplace_back( "GUN", _( "Type: " ), enumerate_as_string( types_of_ammo.begin(),
+        types_of_ammo.end(), []( const ammotype & at ) {
             return at->name();
         }, enumeration_conjunction::none ) );
     }
@@ -4505,7 +4504,8 @@ std::string item::display_name( unsigned int quantity ) const
     }
 
     std::string ammotext;
-    if( ( ( is_gun() && ammo_required() ) || is_magazine() ) && get_option<bool>( "AMMO_IN_NAMES" ) ) {
+    if( !is_ammo() && ( ( is_gun() && ammo_required() ) || is_magazine() ) &&
+        get_option<bool>( "AMMO_IN_NAMES" ) ) {
         if( ammo_current() != "null" ) {
             ammotext = find_type( ammo_current() )->ammo->type->name();
         } else if( !ammo_types().empty() ) {
