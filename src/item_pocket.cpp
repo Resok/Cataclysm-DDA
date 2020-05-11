@@ -406,18 +406,21 @@ item *item_pocket::magazine_current()
 int item_pocket::ammo_consume( int qty )
 {
     int need = qty;
+    int used = 0;
     while( !contents.empty() ) {
         item &e = contents.front();
         if( need >= e.charges ) {
             need -= e.charges;
+            used += e.charges;
             contents.erase( contents.begin() );
         } else {
             e.charges -= need;
+            used = need;
             need = 0;
             break;
         }
     }
-    return qty - need;
+    return qty - used;
 }
 
 int item_pocket::ammo_capacity( const ammotype &ammo ) const
