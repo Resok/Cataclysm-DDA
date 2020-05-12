@@ -2208,6 +2208,15 @@ void Item_factory::check_and_create_magazine_pockets( itype &def )
         // we assume they're good to go, or error elsewhere
         return;
     }
+    // the item we're trying to migrate must actually have data for ammo
+    if( def.magazines.empty() && !(def.gun || def.magazine || def.tool) ) {
+        return;
+    }
+    if( def.tool && def.tool->max_charges == 0 ) {
+        // if a tool has no max charges, it doesn't need an ammo
+        return;
+    }
+
     pocket_data mag_data;
     mag_data.holster = true;
     mag_data.volume_capacity = 200_liter;

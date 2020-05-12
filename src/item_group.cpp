@@ -323,7 +323,13 @@ void Item_modifier::modify( item &new_item ) const
             }
         } else {
             const item am = ammo->create_single( new_item.birthday() );
-            new_item.ammo_set( am.typeId(), ch );
+            if( new_item.magazine_default() != "null" ) {
+                item mag( new_item.magazine_default() );
+                mag.ammo_set( am.typeId(), ch );
+                new_item.put_in( mag, item_pocket::pocket_type::MAGAZINE_WELL );
+            } else {
+                new_item.ammo_set( am.typeId(), ch );
+            }
         }
         // Make sure the item is in valid state
         if( new_item.ammo_data() && new_item.magazine_integral() ) {
@@ -334,23 +340,28 @@ void Item_modifier::modify( item &new_item ) const
         }
     }
 
-    if( new_item.is_tool() || new_item.is_gun() || new_item.is_magazine() ) {
+    if(new_item.is_magazine() || new_item.contents.has_pocket_type( item_pocket::pocket_type::MAGAZINE_WELL) ) {
         bool spawn_ammo = rng( 0, 99 ) < with_ammo && new_item.ammo_remaining() == 0 && ch == -1 &&
                           ( !new_item.is_tool() || new_item.type->tool->rand_charges.empty() );
         bool spawn_mag  = rng( 0, 99 ) < with_magazine && !new_item.magazine_integral() &&
                           !new_item.magazine_current();
 
         if( spawn_mag ) {
-            new_item.put_in( item( new_item.magazine_default(), new_item.birthday() ),
-                             item_pocket::pocket_type::MAGAZINE );
-        }
-
-        if( spawn_ammo ) {
+            item mag( new_item.magazine_default(), new_item.birthday() );
+            if( spawn_ammo ) {
+                mag.ammo_set( mag.ammo_default() );
+            }
+            new_item.put_in( mag, item_pocket::pocket_type::MAGAZINE_WELL );
+        } else if( spawn_ammo ) {
             if( ammo ) {
                 const item am = ammo->create_single( new_item.birthday() );
                 new_item.ammo_set( am.typeId() );
             } else {
-                new_item.ammo_set( new_item.ammo_default() );
+                if( new_item.ammo_default() == "NULL" ) {
+                    debugmsg( "tried to set null default ammo for %s", new_item.typeId() );
+                } else {
+                    new_item.ammo_set( new_item.ammo_default() );
+                }
             }
         }
     }

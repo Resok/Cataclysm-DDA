@@ -20,6 +20,18 @@
     "fuel": { "energy": 1 }
   },
   {
+    "type": "AMMO",
+    "id": "butane",
+    "name": { "str_sp": "butane" },
+    "symbol": "~",
+    "description": "A common flammable liquid used in lighters.",
+    "volume": "1 ml",
+    "weight": "1 mg",
+    "color": "white",
+    "flags": [ "TRADER_AVOID" ],
+    "ammo_type": "butane"
+  },
+  {
     "type": "TOOL",
     "id": "betavoltaic",
     "category": "spare_parts",
