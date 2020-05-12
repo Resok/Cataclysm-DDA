@@ -2313,8 +2313,9 @@ item::reload_option player::select_ammo( const item &base, bool prompt, bool emp
                 } else if( base.is_watertight_container() ) {
                     name = base.is_container_empty() ? "liquid" : base.contents.legacy_front().tname();
                 } else {
-                    name = enumerate_as_string( base.ammo_types().begin(),
-                    base.ammo_types().end(), []( const ammotype & at ) {
+                    const std::set<ammotype> types_of_ammo = base.ammo_types();
+                    name = enumerate_as_string( types_of_ammo.begin(),
+                    types_of_ammo.end(), []( const ammotype & at ) {
                         return at->name();
                     }, enumeration_conjunction::none );
                 }
