@@ -2591,11 +2591,11 @@ void find_ammo_helper( T &src, const item &obj, bool empty, Output out, bool nes
                 // guns/tools never contain usable ammo so most efficient to skip them now
                 return VisitResponse::SKIP;
             }
-            if( !node->made_of_from_type( SOLID ) ) {
+            if( !node->made_of_from_type( SOLID ) && parent == nullptr ) {
                 // some liquids are ammo but we can't reload with them unless within a container or frozen
                 return VisitResponse::SKIP;
             }
-            if( !node->made_of( SOLID ) && parent->is_ammo_container() ) {
+            if( !node->made_of( SOLID ) && parent != nullptr ) {
                 for( const ammotype &at : ammo ) {
                     if( node->ammo_type() == at ) {
                         out = item_location( src, node );
