@@ -3214,7 +3214,7 @@
     ],
     "items": {
       "both": {
-        "items": [ "stockings", "pockknife", "matches", "pipe_tobacco", "tobacco", "backpack" ],
+        "items": [ "stockings", "pockknife", "matches", "pipe_tobacco", "tobacco", "rucksack" ],
         "entries": [ { "group": "charged_cell_phone" } ]
       },
       "male": {
@@ -3231,7 +3231,13 @@
           "pipe_cleaner"
         ],
         "entries": [
-          { "item": "rifle_flintlock", "ammo-item": "flintlock_ammo", "charges": 1, "contents-item": "shoulder_strap" },
+          {
+            "item": "rifle_flintlock",
+            "ammo-item": "flintlock_ammo",
+            "charges": 1,
+            "contents-item": "shoulder_strap",
+            "custom-flags": [ "auto_wield" ]
+          },
           { "item": "flintlock_pouch", "contents-group": "flintlock_pouch_reenactor" },
           { "item": "flintlock_ammo", "charges": 15 },
           { "item": "vinegar", "container-item": "bottle_plastic_small" },
@@ -3268,7 +3274,7 @@
     ],
     "items": {
       "both": {
-        "items": [ "stockings", "pockknife", "matches", "pipe_tobacco", "tobacco", "backpack" ],
+        "items": [ "stockings", "pockknife", "matches", "pipe_tobacco", "tobacco", "rucksack" ],
         "entries": [ { "group": "charged_cell_phone" } ]
       },
       "male": [
@@ -3299,7 +3305,13 @@
           "pipe_cleaner"
         ],
         "entries": [
-          { "item": "rifle_flintlock", "ammo-item": "flintlock_ammo", "charges": 1, "contents-item": "shoulder_strap" },
+          {
+            "item": "rifle_flintlock",
+            "ammo-item": "flintlock_ammo",
+            "charges": 1,
+            "contents-item": "shoulder_strap",
+            "custom-flags": [ "auto_wield" ]
+          },
           { "item": "flintlock_pouch", "contents-group": "flintlock_pouch_reenactor" },
           { "item": "flintlock_ammo", "charges": 15 },
           { "item": "vinegar", "container-item": "bottle_plastic_small" },
