@@ -133,6 +133,14 @@
     "dispersion": 480,
     "durability": 8,
     "min_cycle_recoil": 135,
-    "magazines": [ [ "32", [ "kp32mag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "max_contains_volume": "400 ml",
+        "max_contains_weight": "300 g",
+        "holster": true,
+        "item_restriction": [ "kp32mag" ]
+      }
+    ]
   }
 ]

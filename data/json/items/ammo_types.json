@@ -307,6 +307,12 @@
   },
   {
     "type": "ammunition_type",
+    "id": "match",
+    "name": "match",
+    "default": "match"
+  },
+  {
+    "type": "ammunition_type",
     "id": "motor_oil",
     "name": "motor oil",
     "default": "motor_oil"

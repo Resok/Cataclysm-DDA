@@ -18,7 +18,15 @@
     "ammo": [ "357sig" ],
     "dispersion": 480,
     "durability": 7,
-    "magazines": [ [ "357sig", [ "p226mag_12rd_357sig" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "1 L",
+        "max_contains_weight": "1 kg",
+        "item_restriction": [ "p226mag_12rd_357sig" ]
+      }
+    ]
   },
   {
     "id": "glock_31",
@@ -50,6 +58,14 @@
     "ammo": [ "357sig" ],
     "dispersion": 480,
     "durability": 6,
-    "magazines": [ [ "357sig", [ "p320mag_13rd_357sig" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "p320mag_13rd_357sig" ]
+      }
+    ]
   }
 ]
