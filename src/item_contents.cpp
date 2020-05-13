@@ -766,11 +766,10 @@ std::set<itype_id> item_contents::magazine_compatible() const
 {
     std::set<itype_id> ret;
     for( const item_pocket &pocket : contents ) {
-        if( !pocket.is_type( item_pocket::pocket_type::MAGAZINE_WELL ) ) {
-            continue;
-        }
-        for( const itype_id &id : pocket.item_type_restrictions() ) {
-            ret.emplace( id );
+        if( pocket.is_type( item_pocket::pocket_type::MAGAZINE_WELL ) ) {
+            for( const itype_id &id : pocket.item_type_restrictions() ) {
+                ret.emplace( id );
+            }
         }
     }
     return ret;
