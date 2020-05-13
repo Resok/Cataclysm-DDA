@@ -202,10 +202,13 @@
     "durability": 8,
     "min_cycle_recoil": 1350,
     "modes": [ [ "DEFAULT", "semi-auto", 1 ], [ "AUTO", "auto", 4 ] ],
-    "magazines": [
-      [
-        "223",
-        [
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "3 L",
+        "max_contains_weight": "5 kg",
+        "item_restriction": [
           "stanag30",
           "stanag5",
           "stanag10",
@@ -220,7 +223,7 @@
           "stanag150",
           "survivor223mag"
         ]
-      ]
+      }
     ]
   },
   {
@@ -282,10 +285,13 @@
       [ "sling", 1 ],
       [ "stock", 1 ]
     ],
-    "magazines": [
-      [
-        "223",
-        [
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "5 L",
+        "max_contains_weight": "8 kg",
+        "item_restriction": [
           "belt223",
           "stanag30",
           "stanag5",
@@ -301,7 +307,7 @@
           "stanag150",
           "survivor223mag"
         ]
-      ]
+      }
     ]
   },
   {
@@ -356,10 +362,13 @@
     "durability": 6,
     "min_cycle_recoil": 1350,
     "modes": [ [ "DEFAULT", "semi-auto", 1 ], [ "AUTO", "auto", 4 ] ],
-    "magazines": [
-      [
-        "223",
-        [
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "max_contains_volume": "3 L",
+        "max_contains_weight": "5 kg",
+        "holster": true,
+        "item_restriction": [
           "stanag30",
           "stanag5",
           "stanag10",
@@ -374,7 +383,7 @@
           "stanag150",
           "survivor223mag"
         ]
-      ]
+      }
     ]
   },
   {
@@ -519,7 +528,16 @@
       [ "stock mount", 1 ],
       [ "underbarrel mount", 1 ]
     ],
-    "magazines": [ [ "223", [ "ruger20", "ruger5", "ruger10", "ruger30", "ruger90", "ruger100", "ruger_makeshiftmag" ] ] ]
+    "modes": [ [ "DEFAULT", "semi-auto", 1, "NPC_AVOID" ], [ "AUTO", "auto", 2, "NPC_AVOID" ] ],
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "max_contains_volume": "15 L",
+        "max_contains_weight": "20 kg",
+        "holster": true,
+        "item_restriction": [ "ruger20", "ruger5", "ruger10", "ruger30", "ruger90", "ruger100", "ruger_makeshiftmag" ]
+      }
+    ]
   },
   {
     "id": "scar_l",

@@ -16,19 +16,22 @@
     "charges_per_use": 1,
     "turns_per_charge": 20,
     "use_action": "DOLLCHAT",
-    "magazines": [
-      [
-        "battery",
-        [
-          "light_minus_disposable_cell",
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "max_contains_volume": "5 L",
+        "max_contains_weight": "5 kg",
+        "holster": true,
+        "item_restriction": [
           "light_disposable_cell",
-          "light_minus_battery_cell",
+          "light_minus_disposable_cell",
           "light_battery_cell",
           "light_plus_battery_cell",
+          "light_minus_battery_cell",
           "light_atomic_battery_cell",
           "light_minus_atomic_battery_cell"
         ]
-      ]
+      }
     ]
   },
   {
@@ -48,19 +51,22 @@
     "charges_per_use": 1,
     "turns_per_charge": 20,
     "use_action": "DOLLCHAT",
-    "magazines": [
-      [
-        "battery",
-        [
-          "light_minus_disposable_cell",
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "max_contains_volume": "5 L",
+        "max_contains_weight": "5 kg",
+        "holster": true,
+        "item_restriction": [
           "light_disposable_cell",
-          "light_minus_battery_cell",
+          "light_minus_disposable_cell",
           "light_battery_cell",
           "light_plus_battery_cell",
+          "light_minus_battery_cell",
           "light_atomic_battery_cell",
           "light_minus_atomic_battery_cell"
         ]
-      ]
+      }
     ]
   },
   {

@@ -100,7 +100,15 @@
     "durability": 7,
     "min_cycle_recoil": 540,
     "blackpowder_tolerance": 48,
-    "magazines": [ [ "45", [ "m1911mag", "m1911bigmag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "holster": true,
+        "item_restriction": [ "m1911mag", "m1911bigmag" ]
+      }
+    ]
   },
   {
     "id": "m1911_MEU",
@@ -313,7 +321,15 @@
     "price_postapoc": 2500,
     "ranged_damage": 0,
     "built_in_mods": [ "match_trigger" ],
-    "magazines": [ [ "45", [ "usp45mag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "400 ml",
+        "max_contains_weight": "200 g",
+        "item_restriction": [ "usp45mag" ]
+      }
+    ]
   },
   {
     "id": "mk23",
@@ -344,7 +360,15 @@
     "ammo": [ "45" ],
     "dispersion": 480,
     "durability": 9,
-    "magazines": [ [ "45", [ "ppq45mag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "glock17_17", "glock17_22", "glock_drum_50rd", "glock_drum_100rd", "glockbigmag" ]
+      }
+    ]
   },
   {
     "id": "hptjhp",

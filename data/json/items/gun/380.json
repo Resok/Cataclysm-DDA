@@ -70,7 +70,15 @@
     "dispersion": 480,
     "durability": 8,
     "min_cycle_recoil": 270,
-    "magazines": [ [ "380", [ "rugerlcpmag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "rugerlcpmag" ]
+      }
+    ]
   },
   {
     "id": "hptcf380",
@@ -90,7 +98,15 @@
     "ammo": [ "380" ],
     "dispersion": 480,
     "durability": 7,
-    "magazines": [ [ "380", [ "hptcf380mag_8rd", "hptcf380mag_10rd" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "holster": true,
+        "item_restriction": [ "hptcf380mag_8rd", "hptcf380mag_10rd" ]
+      }
+    ]
   },
   {
     "id": "taurus_spectrum",
@@ -112,6 +128,14 @@
     "dispersion": 480,
     "durability": 7,
     "min_cycle_recoil": 225,
-    "magazines": [ [ "380", [ "taurus_spectrum_mag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "taurus_spectrum_mag" ]
+      }
+    ]
   }
 ]
