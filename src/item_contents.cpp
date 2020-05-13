@@ -394,10 +394,9 @@ int item_contents::ammo_capacity( const ammotype &ammo ) const
 {
     int ret = 0;
     for( const item_pocket &pocket : contents ) {
-        if( !pocket.is_type( item_pocket::pocket_type::MAGAZINE ) ) {
-            continue;
+        if( pocket.is_type( item_pocket::pocket_type::MAGAZINE ) ) {
+            ret += pocket.ammo_capacity( ammo );
         }
-        ret += pocket.ammo_capacity( ammo );
     }
     return ret;
 }
