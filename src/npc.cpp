@@ -831,8 +831,10 @@ void npc::starting_weapon( const npc_class_id &type )
             item mag( weapon.magazine_default() );
             mag.ammo_set( mag.ammo_default() );
             weapon.put_in( mag, item_pocket::pocket_type::MAGAZINE_WELL );
-        } else {
+        } else if( weapon.ammo_default() != "NULL" ) {
             weapon.ammo_set( weapon.ammo_default() );
+        } else {
+            debugmsg( "tried setting ammo for %s which has no magazine or ammo", weapon.typeId() );
         }
     }
     weapon.set_owner( get_faction()->id );

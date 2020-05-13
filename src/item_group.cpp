@@ -264,7 +264,7 @@ void Item_modifier::modify( item &new_item ) const
     }
 
     int max_capacity = -1;
-    if( charges.first != -1 && charges.second == -1 ) {
+    if( charges.first != -1 && charges.second == -1 && new_item.is_magazine() ) {
         const int max_ammo = new_item.ammo_capacity( item_controller->find_template(
                                  new_item.ammo_default() )->ammo->type );
         if( max_ammo > 0 ) {

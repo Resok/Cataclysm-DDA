@@ -7621,9 +7621,12 @@ bool item::reload( player &u, item_location ammo, int qty )
     }
 
     // limit quantity of ammo loaded to remaining capacity
-    int limit = is_watertight_container()
-                ? get_remaining_capacity_for_liquid( *ammo )
-                : ammo_capacity( ammo->ammo_data()->ammo->type ) - ammo_remaining();
+    int limit = 0;
+    if( is_watertight_container() ) {
+        limit = get_remaining_capacity_for_liquid( *ammo );
+    } else if( ammo->ammo_data() && ammo->ammo_data()->ammo ) {
+        limit = ammo_capacity( ammo->ammo_data()->ammo->type ) - ammo_remaining();
+    }
 
     if( ammo->ammo_type() == ammo_plutonium ) {
         limit = limit / PLUTONIUM_CHARGES + ( limit % PLUTONIUM_CHARGES != 0 );

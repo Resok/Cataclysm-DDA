@@ -85,7 +85,17 @@ static void arm_shooter( npc &shooter, const std::string &gun_type,
     const itype_id &gun_id( gun_type );
     // Give shooter a loaded gun of the requested type.
     item &gun = shooter.i_add( item( gun_id ) );
-    const itype_id ammo_id = ammo_type.empty() ? gun.ammo_default() : itype_id( ammo_type );
+    itype_id ammo_id;
+    // if ammo is not supplied we want the default
+    if( ammo_type.empty() ) {
+        if( gun.ammo_default() == "NULL" ) {
+            ammo_id = item( gun.magazine_default() ).ammo_default();
+        } else {
+            ammo_id = gun.ammo_default();
+        }
+    } else {
+        ammo_id = itype_id( ammo_type );
+    }
     const ammotype &type_of_ammo = item::find_type( ammo_id )->ammo->type;
     if( gun.magazine_integral() ) {
         item &ammo = shooter.i_add( item( ammo_id, calendar::turn, gun.ammo_capacity( type_of_ammo ) ) );

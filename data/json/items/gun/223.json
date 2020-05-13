@@ -64,10 +64,13 @@
     "dispersion": 150,
     "durability": 7,
     "min_cycle_recoil": 1350,
-    "magazines": [
-      [
-        "223",
-        [
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "max_contains_volume": "15 L",
+        "max_contains_weight": "20 kg",
+        "holster": true,
+        "item_restriction": [
           "stanag30",
           "stanag5",
           "stanag10",
@@ -82,7 +85,7 @@
           "stanag150",
           "survivor223mag"
         ]
-      ]
+      }
     ]
   },
   {
@@ -107,7 +110,15 @@
     "dispersion": 380,
     "durability": 6,
     "min_cycle_recoil": 1350,
-    "magazines": [ [ "223", [ "stanag30", "stanag50", "survivor223mag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "stanag30", "stanag50", "survivor223mag" ]
+      }
+    ]
   },
   {
     "id": "famas",

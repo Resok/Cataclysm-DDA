@@ -1800,7 +1800,13 @@ double player::gun_value( const item &weap, int ammo ) const
 
     damage_instance gun_damage = weap.gun_damage();
     item tmp = weap;
-    tmp.ammo_set( ammo_type );
+    if( tmp.is_magazine() ) {
+        tmp.ammo_set( ammo_type );
+    } else if( tmp.contents.has_pocket_type( item_pocket::pocket_type::MAGAZINE_WELL ) ) {
+        item mag( *weap.magazine_current() );
+        mag.ammo_set( ammo_type );
+        tmp.put_in( mag, item_pocket::pocket_type::MAGAZINE_WELL );
+    }
     int total_dispersion = get_weapon_dispersion( tmp ).max() +
                            effective_dispersion( tmp.sight_dispersion() );
 

@@ -608,7 +608,15 @@
       [ "stock", 1 ],
       [ "underbarrel", 1 ]
     ],
-    "magazines": [ [ "9mm", [ "uzimag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "max_contains_volume": "15 L",
+        "max_contains_weight": "20 kg",
+        "holster": true,
+        "item_restriction": [ "uzimag" ]
+      }
+    ]
   },
   {
     "id": "glock_17",
