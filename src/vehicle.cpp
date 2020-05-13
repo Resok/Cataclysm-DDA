@@ -5248,7 +5248,7 @@ void vehicle::place_spawn_items()
         return;
     }
 
-    for( const auto &pt : type->parts ) {
+    for( const vehicle_prototype::part_def &pt : type->parts ) {
         if( pt.with_ammo ) {
             int turret = part_with_feature( pt.pos, "TURRET", true );
             if( turret >= 0 && x_in_y( pt.with_ammo, 100 ) ) {
@@ -5295,9 +5295,12 @@ void vehicle::place_spawn_items()
                                           !e.magazine_current();
 
                         if( spawn_mag ) {
-                            e.put_in( item( e.magazine_default(), e.birthday() ), item_pocket::pocket_type::MAGAZINE );
-                        }
-                        if( spawn_ammo ) {
+                            item mag( e.magazine_default(), e.birthday() );
+                            if( spawn_ammo ) {
+                                mag.ammo_set( mag.ammo_default() );
+                            }
+                            e.put_in( mag, item_pocket::pocket_type::MAGAZINE_WELL );
+                        } else if( spawn_ammo && e.is_magazine() ) {
                             e.ammo_set( e.ammo_default() );
                         }
                     }

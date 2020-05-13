@@ -259,7 +259,13 @@ int vehicle_part::ammo_set( const itype_id &ammo, int qty )
     }
 
     if( is_turret() ) {
-        return base.ammo_set( ammo, qty ).ammo_remaining();
+        if( base.is_magazine() ) {
+            return base.ammo_set( ammo, qty ).ammo_remaining();
+        } else if( base.magazine_default() != "null" ) {
+            item mag( base.magazine_default() );
+            mag.ammo_set( ammo, qty );
+            base.put_in( mag, item_pocket::pocket_type::MAGAZINE_WELL );
+        }
     }
 
     if( is_fuel_store() ) {

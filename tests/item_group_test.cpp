@@ -15,7 +15,7 @@ TEST_CASE( "spawn with default charges and with ammo", "[item_group]" )
 
     SECTION( "gun with ammo type" ) {
         item glock( "glock_19" );
-        REQUIRE( glock.ammo_default() != "NULL" );
+        REQUIRE( glock.magazine_default() != "null" );
         default_charges.modify( glock );
         CHECK( glock.remaining_ammo_capacity() == 0 );
     }
