@@ -2208,10 +2208,10 @@ void Item_factory::check_and_create_magazine_pockets( itype &def )
         return;
     }
     // the item we're trying to migrate must actually have data for ammo
-    if( def.magazines.empty() && !(def.gun || def.magazine || def.tool) ) {
+    if( def.magazines.empty() && !( def.gun || def.magazine || def.tool ) ) {
         return;
     }
-    if( def.tool && def.tool->max_charges == 0 ) {
+    if( def.pockets.empty() && def.tool && def.tool->max_charges == 0 ) {
         // if a tool has no max charges, it doesn't need an ammo
         return;
     }
