@@ -313,6 +313,12 @@
   },
   {
     "type": "ammunition_type",
+    "id": "oxygen",
+    "name": "oxygen",
+    "default": "oxygen"
+  },
+  {
+    "type": "ammunition_type",
     "id": "motor_oil",
     "name": "motor oil",
     "default": "motor_oil"

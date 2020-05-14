@@ -44,6 +44,19 @@
     "ammo_type": "match"
   },
   {
+    "type": "AMMO",
+    "id": "oxygen",
+    "name": { "str_sp": "oxygen" },
+    "symbol": "~",
+    "color": "white",
+    "description": "Compressed medical oxygen.",
+    "weight": "1 mg",
+    "volume": "1 ml",
+    "flags": [ "TRADER_AVOID" ],
+    "phase": "gas",
+    "ammo_type": "oxygen"
+  },
+  {
     "type": "TOOL",
     "id": "betavoltaic",
     "category": "spare_parts",
