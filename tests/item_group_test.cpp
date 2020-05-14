@@ -8,7 +8,7 @@ TEST_CASE( "spawn with default charges and with ammo", "[item_group]" )
     default_charges.with_ammo = 100;
     SECTION( "tools without ammo" ) {
         item matches( "matches" );
-        REQUIRE( matches.ammo_default() == "NULL" );
+        REQUIRE( matches.ammo_default() == "match" );
         default_charges.modify( matches );
         CHECK( matches.remaining_ammo_capacity() == 0 );
     }
