@@ -7610,9 +7610,9 @@ bool item::reload( player &u, item_location ammo, int qty )
     }
 
     item_location container;
-    if( ammo->is_ammo_container() ) {
+    if( ammo->has_flag( flag_SPEEDLOADER ) ) {
         container = ammo;
-        // if the thing passed in isn't ammo, we get the first ammo contained
+        // if the thing passed in is a speed loader, we want the ammo
         ammo = item_location( ammo, &ammo->contents.first_ammo() );
     }
 

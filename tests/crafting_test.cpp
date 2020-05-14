@@ -405,8 +405,12 @@ TEST_CASE( "tools use charge to craft", "[crafting][charge]" )
         // - 10 charges of surface heat
 
         WHEN( "each tool has enough charges" ) {
-            tools.push_back( tool_with_ammo( "hotplate", 20 ) );
-            tools.push_back( tool_with_ammo( "soldering_iron", 20 ) );
+            item hotplate = tool_with_ammo( "hotplate", 20 );
+            REQUIRE( hotplate.ammo_remaining() == 20 );
+            tools.push_back( hotplate );
+            item soldering = tool_with_ammo( "soldering_iron", 20 );
+            REQUIRE( soldering.ammo_remaining() == 20 );
+            tools.push_back( soldering );
 
             THEN( "crafting succeeds, and uses charges from each tool" ) {
                 int turns = actually_test_craft( recipe_id( "carver_off" ), tools, INT_MAX );
