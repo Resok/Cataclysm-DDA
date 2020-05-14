@@ -233,7 +233,15 @@
       [ "sling", 1 ],
       [ "stock", 1 ]
     ],
-    "magazines": [ [ "308", [ "belt308" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "5 L",
+        "max_contains_weight": "6 kg",
+        "item_restriction": [ "belt308" ]
+      }
+    ]
   },
   {
     "id": "m60_semi",
