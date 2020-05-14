@@ -90,7 +90,7 @@ TEST_CASE( "reload_gun_with_swappable_magazine", "[reload],[gun]" )
     REQUIRE( magazine_type->type.count( ammo_type->type ) != 0 );
 
     item gun( "glock_19" );
-    gun.put_in( mag, item_pocket::pocket_type::MAGAZINE );
+    gun.put_in( mag, item_pocket::pocket_type::MAGAZINE_WELL );
     REQUIRE( gun.magazine_current() != nullptr );
     REQUIRE( gun.ammo_types().count( ammo_type->type ) != 0 );
     dummy.i_add( gun );
