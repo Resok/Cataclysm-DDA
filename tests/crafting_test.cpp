@@ -434,7 +434,11 @@ TEST_CASE( "tools use charge to craft", "[crafting][charge]" )
             item soldering_iron( "soldering_iron" );
             soldering_iron.put_in( item( "battery_ups" ), item_pocket::pocket_type::MOD );
             tools.push_back( soldering_iron );
-            tools.emplace_back( "UPS_off", -1, 500 );
+            item UPS( "UPS_off" );
+            item UPS_mag( UPS.magazine_default() );
+            UPS_mag.ammo_set( UPS_mag.ammo_default(), 500 );
+            UPS.put_in( UPS_mag, item_pocket::pocket_type::MAGAZINE_WELL );
+            tools.emplace_back( UPS );
 
             THEN( "crafting succeeds, and uses charges from the UPS" ) {
                 actually_test_craft( recipe_id( "carver_off" ), tools, INT_MAX );

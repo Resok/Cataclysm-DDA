@@ -8208,7 +8208,17 @@ bool item::use_charges( const itype_id &what, int &qty, std::list<item> &used,
                 int n = std::min( e->ammo_remaining(), qty );
                 qty -= n;
 
-                used.push_back( item( *e ).ammo_set( e->ammo_current(), n ) );
+                item temp( *e );
+                if( temp.is_magazine() ) {
+                    temp.ammo_set( e->ammo_current(), n );
+                } else if( e->magazine_current() != nullptr ) {
+                    item temp_mag( *e->magazine_current() );
+                    temp_mag.ammo_set( e->ammo_current(), n );
+                    temp.put_in( temp_mag, item_pocket::pocket_type::MAGAZINE_WELL );
+                } else {
+                    return VisitResponse::SKIP;
+                }
+                used.push_back( temp );
                 e->ammo_consume( n, pos );
             }
             return VisitResponse::SKIP;
