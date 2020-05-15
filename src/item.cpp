@@ -7655,7 +7655,7 @@ bool item::reload( player &u, item_location ammo, int qty )
             ammo_copy.charges = qty;
             put_in( ammo_copy, item_pocket::pocket_type::MAGAZINE );
             ammo->ammo_consume( qty, tripoint_zero );
-        } else if( ammo->ammo_type() == ammotype( "plutonium" ) ) {
+        } else if( ammo->ammo_type() == ammo_plutonium ) {
             curammo = ammo->type;
             ammo->charges -= qty;
 
