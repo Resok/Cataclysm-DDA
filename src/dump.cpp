@@ -213,7 +213,7 @@ bool game::dump_stats( const std::string &what, dump_mode mode,
             if( e->gun ) {
                 item gun( e );
                 if( !gun.magazine_integral() ) {
-                    gun.put_in( item( gun.magazine_default() ), item_pocket::pocket_type::MAGAZINE );
+                    gun.put_in( item( gun.magazine_default() ), item_pocket::pocket_type::MAGAZINE_WELL );
                 }
                 gun.ammo_set( gun.ammo_default( false ) );
 
