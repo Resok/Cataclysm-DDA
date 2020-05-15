@@ -414,7 +414,6 @@ int item_pocket::ammo_consume( int qty )
         } else {
             e.charges -= need;
             used = need;
-            need = 0;
             break;
         }
     }
