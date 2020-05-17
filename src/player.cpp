@@ -4002,44 +4002,25 @@ bool player::has_magazine_for_ammo( const ammotype &at ) const
 std::string player::weapname( unsigned int truncate ) const
 {
     if( weapon.is_gun() ) {
-        std::string str = string_format( "(%s) %s", weapon.gun_current_mode().tname(), weapon.type_name() );
-        const itype *loaded_ammo = weapon.ammo_data();
-        // Is either the base item or at least one auxiliary gunmod loaded (includes empty magazines)
-        bool base = loaded_ammo != nullptr && !weapon.has_flag( "RELOAD_AND_SHOOT" );
-        ammotype loaded_ammotype;
-        if( loaded_ammo == nullptr ) {
-            loaded_ammotype = item::find_type( weapon.ammo_default() )->ammo->type;
-        } else {
-            loaded_ammotype = loaded_ammo->ammo->type;
+        std::string gunmode;
+        // only required for empty mags and empty guns
+        std::string mag_ammo;
+        if( weapon.gun_all_modes().size() > 1 ) {
+            gunmode = weapon.gun_current_mode().tname();
         }
-        const auto mods = weapon.gunmods();
-        bool aux = std::any_of( mods.begin(), mods.end(), [&]( const item * e ) {
-            return e->is_gun() && e->ammo_capacity( loaded_ammotype ) > 0 && !e->has_flag( "RELOAD_AND_SHOOT" );
-        } );
 
-        if( base || aux ) {
-            str += " (";
-            if( base ) {
-                str += std::to_string( weapon.ammo_remaining() );
-                if( weapon.magazine_integral() ) {
-                    str += "/" + std::to_string( weapon.ammo_capacity( loaded_ammotype ) );
-                }
+        if( weapon.ammo_remaining() == 0 ) {
+            if( weapon.magazine_current() != nullptr ) {
+                const item *mag = weapon.magazine_current();
+                mag_ammo = string_format( " (0/%d)",
+                                          mag->ammo_capacity( item( mag->ammo_default() ).ammo_type() ) );
             } else {
-                str += "---";
-            }
-            str += ")";
-
-            for( auto e : mods ) {
-                if( e->is_gun() && e->ammo_capacity( loaded_ammotype ) > 0 && !e->has_flag( "RELOAD_AND_SHOOT" ) ) {
-                    str += " (" + std::to_string( e->ammo_remaining() );
-                    if( e->magazine_integral() ) {
-                        str += "/" + std::to_string( e->ammo_capacity( loaded_ammotype ) );
-                    }
-                    str += ")";
-                }
+                mag_ammo = _( " (empty)" );
             }
         }
-        return str;
+
+        return utf8_truncate( string_format( "%s%s%s",
+                                             gunmode, weapon.display_name(), mag_ammo ), truncate );
 
     } else if( !is_armed() ) {
         return _( "fists" );
