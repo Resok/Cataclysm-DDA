@@ -4505,7 +4505,8 @@ std::string item::display_name( unsigned int quantity ) const
         if( adata ) {
             max_amount = mag->ammo_capacity( adata->ammo->type );
         } else {
-            max_amount = mag->ammo_capacity( item_controller->find_template( ammo_default() )->ammo->type );
+            max_amount = mag->ammo_capacity( item_controller->find_template(
+                                                 mag->ammo_default() )->ammo->type );
         }
 
     } else if( !ammo_types().empty() ) {
@@ -7555,7 +7556,7 @@ void item::reload_option::qty( int val )
     // This gets rounded up to 1 later.
     int remaining_capacity = target->is_watertight_container() ?
                              target->get_remaining_capacity_for_liquid( ammo_obj, true ) :
-                             target->ammo_capacity( ammo_obj.ammo_data()->ammo->type ) - target->ammo_remaining();
+                             target->remaining_ammo_capacity();
     if( target->has_flag( flag_RELOAD_ONE ) && !ammo->has_flag( flag_SPEEDLOADER ) ) {
         remaining_capacity = 1;
     }
