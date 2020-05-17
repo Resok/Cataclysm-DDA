@@ -148,7 +148,7 @@ class item_contents
 
         // heats up the contents if they have temperature
         void heat_up();
-        // returns qty - need
+        // returns amount of ammo consumed
         int ammo_consume( int qty, const tripoint &pos );
         item *magazine_current();
         std::set<ammotype> ammo_types() const;

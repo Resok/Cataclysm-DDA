@@ -370,7 +370,7 @@ int item_contents::ammo_consume( int qty, const tripoint &pos )
             qty -= res;
         } else if( pocket.is_type( item_pocket::pocket_type::MAGAZINE ) ) {
 
-            qty = pocket.ammo_consume( qty );
+            qty -= pocket.ammo_consume( qty );
         }
     }
     return qty;
