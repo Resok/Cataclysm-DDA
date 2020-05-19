@@ -58,7 +58,15 @@
       [ "rail mount", 1 ],
       [ "underbarrel mount", 1 ]
     ],
-    "magazines": [ [ "50", [ "belt50" ] ] ],
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "5 L",
+        "max_contains_weight": "10 kg",
+        "item_restriction": [ "belt50" ]
+      }
+    ],
     "flags": [ "MOUNTED_GUN" ]
   },
   {

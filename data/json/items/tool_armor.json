@@ -808,6 +808,15 @@
     "covers": [ "HEAD", "MOUTH", "EYES", "TORSO", "ARMS", "HANDS", "LEGS", "FEET" ],
     "warmth": 30,
     "environmental_protection": 15,
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "item_restriction": [ "medium_atomic_battery_cell" ],
+        "holster": true,
+        "max_contains_volume": "5 L",
+        "max_contains_weight": "5 kg"
+      }
+    ],
     "encumbrance": 30,
     "coverage": 100,
     "material_thickness": 2

@@ -125,7 +125,15 @@
     "durability": 6,
     "blackpowder_tolerance": 48,
     "min_cycle_recoil": 380,
-    "magazines": [ [ "9mm", [ "glockmag", "glockbigmag", "glock17_17", "glock17_22", "glock_drum_50rd", "glock_drum_100rd" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "glockmag", "glockbigmag", "glock17_17", "glock17_22", "glock_drum_50rd", "glock_drum_100rd" ]
+      }
+    ]
   },
   {
     "id": "hk_mp5",
@@ -264,8 +272,15 @@
     "armor_data": { "covers": [ "ARM_EITHER", "HAND_EITHER" ], "coverage": 10, "encumbrance": 30, "material_thickness": 2 },
     "flags": [ "OVERSIZE", "RELOAD_EJECT", "BELTED", "RESTRICT_HANDS" ],
     "valid_mod_locations": [  ],
-    "pocket_data": [ { "pocket_type": "MAGAZINE", "max_contains_volume": "1 L", "max_contains_weight": "10 kg", "holster": true } ],
-    "magazines": [ [ "9mm", [ "mp5mag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "max_contains_volume": "1 L",
+        "max_contains_weight": "10 kg",
+        "holster": true,
+        "item_restriction": [ "mp5mag" ]
+      }
+    ]
   },
   {
     "id": "ksub2000",
@@ -328,7 +343,15 @@
     "dispersion": 480,
     "durability": 7,
     "min_cycle_recoil": 450,
-    "magazines": [ [ "9mm", [ "m9mag", "m9bigmag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "1 L",
+        "max_contains_weight": "1 kg",
+        "item_restriction": [ "m9mag", "m9bigmag" ]
+      }
+    ]
   },
   {
     "id": "px4",
@@ -350,7 +373,15 @@
     "dispersion": 440,
     "durability": 7,
     "min_cycle_recoil": 450,
-    "magazines": [ [ "9mm", [ "px4mag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "px4mag" ]
+      }
+    ]
   },
   {
     "id": "rifle_9mm",
@@ -530,7 +561,15 @@
     "durability": 9,
     "blackpowder_tolerance": 48,
     "min_cycle_recoil": 450,
-    "magazines": [ [ "9mm", [ "usp9mag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "400 ml",
+        "max_contains_weight": "200 g",
+        "item_restriction": [ "usp9mag" ]
+      }
+    ]
   },
   {
     "id": "uzi",
@@ -569,7 +608,15 @@
       [ "stock", 1 ],
       [ "underbarrel", 1 ]
     ],
-    "magazines": [ [ "9mm", [ "uzimag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "max_contains_volume": "15 L",
+        "max_contains_weight": "20 kg",
+        "holster": true,
+        "item_restriction": [ "uzimag" ]
+      }
+    ]
   },
   {
     "id": "glock_17",
@@ -593,7 +640,15 @@
     "blackpowder_tolerance": 48,
     "min_cycle_recoil": 380,
     "//2": "Glock 17s cannot load magazines shorter than the standard 17rd magazine.",
-    "magazines": [ [ "9mm", [ "glock17_17", "glock17_22", "glock_drum_50rd", "glock_drum_100rd", "glockbigmag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "glock17_17", "glock17_22", "glock_drum_50rd", "glock_drum_100rd", "glockbigmag" ]
+      }
+    ]
   },
   {
     "id": "glock_18c",
@@ -621,7 +676,15 @@
     "bashing": 2,
     "ammo": [ "9mm" ],
     "min_cycle_recoil": 450,
-    "magazines": [ [ "9mm", [ "kpf9mag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "max_contains_volume": "400 ml",
+        "max_contains_weight": "300 g",
+        "holster": true,
+        "item_restriction": [ "kpf9mag" ]
+      }
+    ]
   },
   {
     "id": "m17",
@@ -662,7 +725,15 @@
     "ammo": [ "9mm" ],
     "dispersion": 480,
     "durability": 8,
-    "magazines": [ [ "9mm", [ "bhp9mag_13rd", "bhp9mag_15rd" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "bhp9mag_13rd", "bhp9mag_15rd" ]
+      }
+    ]
   },
   {
     "id": "walther_p38",
@@ -701,7 +772,15 @@
     "ammo": [ "9mm" ],
     "dispersion": 480,
     "durability": 9,
-    "magazines": [ [ "9mm", [ "ppq9mag_10rd", "ppq9mag_15rd", "ppq9mag_17rd" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "ppq9mag_10rd", "ppq9mag_15rd", "ppq9mag_17rd" ]
+      }
+    ]
   },
   {
     "id": "hptc9",
@@ -721,7 +800,15 @@
     "ammo": [ "9mm" ],
     "dispersion": 480,
     "durability": 7,
-    "magazines": [ [ "9mm", [ "hptc9mag_8rd", "hptc9mag_10rd", "hptc9mag_15rd" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "hptc9mag_8rd", "hptc9mag_10rd", "hptc9mag_15rd" ]
+      }
+    ]
   },
   {
     "id": "cz75",
@@ -741,7 +828,15 @@
     "ammo": [ "9mm" ],
     "dispersion": 480,
     "durability": 8,
-    "magazines": [ [ "9mm", [ "cz75mag_12rd", "cz75mag_20rd", "cz75mag_26rd" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "max_contains_volume": "400 ml",
+        "max_contains_weight": "300 g",
+        "holster": true,
+        "item_restriction": [ "cz75mag_12rd", "cz75mag_20rd", "cz75mag_26rd" ]
+      }
+    ]
   },
   {
     "id": "walther_ccp",
@@ -761,6 +856,14 @@
     "ammo": [ "9mm" ],
     "dispersion": 480,
     "durability": 8,
-    "magazines": [ [ "9mm", [ "ccpmag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "ccpmag" ]
+      }
+    ]
   }
 ]

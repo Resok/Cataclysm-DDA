@@ -80,7 +80,15 @@
     "dispersion": 480,
     "durability": 7,
     "min_cycle_recoil": 450,
-    "magazines": [ [ "40", [ "px4_40mag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "px4_40mag" ]
+      }
+    ]
   },
   {
     "id": "rifle_40",
@@ -290,7 +298,15 @@
     "ammo": [ "40" ],
     "dispersion": 480,
     "durability": 8,
-    "magazines": [ [ "40", [ "bhp40mag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "bhp40mag" ]
+      }
+    ]
   },
   {
     "id": "walther_ppq_40",
@@ -309,7 +325,15 @@
     "ammo": [ "40" ],
     "dispersion": 480,
     "durability": 9,
-    "magazines": [ [ "40", [ "ppq40mag_10rd", "ppq40mag_12rd", "ppq40mag_14rd" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "ppq40mag_10rd", "ppq40mag_12rd", "ppq40mag_14rd" ]
+      }
+    ]
   },
   {
     "id": "hptjcp",

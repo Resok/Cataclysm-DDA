@@ -176,6 +176,12 @@ void give_and_activate_bionic( player &p, bionic_id const &bioid )
 item tool_with_ammo( const itype_id &tool, const int qty )
 {
     item tool_it( tool );
-    tool_it.ammo_set( tool_it.ammo_default(), qty );
+    if( tool_it.ammo_default() != "NULL" ) {
+        tool_it.ammo_set( tool_it.ammo_default(), qty );
+    } else if( tool_it.magazine_default() != "null" ) {
+        item tool_it_mag( tool_it.magazine_default() );
+        tool_it_mag.ammo_set( tool_it_mag.ammo_default(), qty );
+        tool_it.put_in( tool_it_mag, item_pocket::pocket_type::MAGAZINE_WELL );
+    }
     return tool_it;
 }

@@ -266,7 +266,15 @@
     "dispersion": 480,
     "durability": 7,
     "min_cycle_recoil": 39,
-    "magazines": [ [ "22", [ "sw22mag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "holster": true,
+        "max_contains_volume": "2 L",
+        "max_contains_weight": "2 kg",
+        "item_restriction": [ "sw22mag" ]
+      }
+    ]
   },
   {
     "id": "j22",
@@ -309,6 +317,14 @@
     "dispersion": 480,
     "durability": 7,
     "min_cycle_recoil": 39,
-    "magazines": [ [ "22", [ "wp22mag" ] ] ]
+    "pocket_data": [
+      {
+        "pocket_type": "MAGAZINE_WELL",
+        "max_contains_volume": "400 ml",
+        "max_contains_weight": "300 g",
+        "holster": true,
+        "item_restriction": [ "wp22mag" ]
+      }
+    ]
   }
 ]
