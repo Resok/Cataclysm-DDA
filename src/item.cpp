@@ -6559,6 +6559,11 @@ bool item::is_salvageable() const
     return !has_flag( flag_NO_SALVAGE );
 }
 
+bool item::is_disassemblable() const
+{
+    return recipe_dictionary::get_uncraft( typeId() ) && !has_flag( flag_ETHEREAL_ITEM );
+}
+
 bool item::is_craft() const
 {
     return craft_data_ != nullptr;
@@ -7509,8 +7514,6 @@ void item::gun_cycle_mode()
         }
     }
     gun_set_mode( modes.begin()->first );
-
-    return;
 }
 
 const use_function *item::get_use( const std::string &use_name ) const

@@ -193,6 +193,7 @@ static const mtype_id mon_manhack( "mon_manhack" );
 
 static const skill_id skill_melee( "melee" );
 static const skill_id skill_dodge( "dodge" );
+static const skill_id skill_gun( "gun" );
 static const skill_id skill_firstaid( "firstaid" );
 static const skill_id skill_survival( "survival" );
 
@@ -816,6 +817,9 @@ bool game::start_game()
 
     g->events().send<event_type::game_start>( u.getID(), u.name, u.male, u.prof->ident(),
             u.custom_profession, getVersionString() );
+    tripoint abs_omt = u.global_omt_location();
+    const oter_id &cur_ter = overmap_buffer.ter( abs_omt );
+    g->events().send<event_type::avatar_enters_omt>( abs_omt, cur_ter );
     return true;
 }
 
@@ -1578,6 +1582,9 @@ bool game::do_turn()
     } else if( const cata::optional<std::string> progress = u.activity.get_progress_message( u ) ) {
         wait_redraw = true;
         wait_message = *progress;
+        if( u.activity.is_interruptible() && u.activity.interruptable_with_kb ) {
+            wait_message += string_format( _( "\n%s to interrupt" ), press_x( ACTION_PAUSE ) );
+        }
         wait_refresh_rate = 5_minutes;
     }
     if( wait_redraw ) {
@@ -2003,6 +2010,111 @@ static void handle_contents_changed( const item_location &acted_item )
     } while( parent.where() == item_location::type::container );
 }
 
+static hint_rating rate_action_change_side( const avatar &you, const item &it )
+{
+    if( !it.is_sided() ) {
+        return hint_rating::cant;
+    }
+
+    return you.is_worn( it ) ? hint_rating::good : hint_rating::iffy;
+}
+
+static hint_rating rate_action_disassemble( avatar &you, const item &it )
+{
+    if( you.can_disassemble( it, you.crafting_inventory() ).success() ) {
+        // Possible right now
+        return hint_rating::good;
+    } else if( it.is_disassemblable() ) {
+        // Potentially possible, but we currently lack requirements
+        return hint_rating::iffy;
+    } else {
+        // Never possible
+        return hint_rating::cant;
+    }
+}
+
+static hint_rating rate_action_eat( const avatar &you, const item &it )
+{
+    if( !you.can_consume( it ) ) {
+        return hint_rating::cant;
+    }
+
+    const auto rating = you.will_eat( it );
+    if( rating.success() ) {
+        return hint_rating::good;
+    } else if( rating.value() == INEDIBLE || rating.value() == INEDIBLE_MUTATION ) {
+        return hint_rating::cant;
+    }
+
+    return hint_rating::iffy;
+}
+
+static hint_rating rate_action_mend( const avatar &, const item &it )
+{
+    // TODO: check also if item damage could be repaired via a tool
+    if( !it.faults.empty() ) {
+        return hint_rating::good;
+    }
+    return it.faults_potential().empty() ? hint_rating::cant : hint_rating::iffy;
+}
+
+static hint_rating rate_action_read( const avatar &you, const item &it )
+{
+    if( !it.is_book() ) {
+        return hint_rating::cant;
+    }
+
+    std::vector<std::string> dummy;
+    return you.get_book_reader( it, dummy ) ? hint_rating::good : hint_rating::iffy;
+}
+
+static hint_rating rate_action_take_off( const avatar &you, const item &it )
+{
+    if( !it.is_armor() || it.has_flag( "NO_TAKEOFF" ) ) {
+        return hint_rating::cant;
+    }
+
+    if( you.is_worn( it ) ) {
+        return hint_rating::good;
+    }
+
+    return hint_rating::iffy;
+}
+
+static hint_rating rate_action_use( const avatar &you, const item &it )
+{
+    if( it.is_tool() ) {
+        return it.ammo_sufficient() ? hint_rating::good : hint_rating::iffy;
+    } else if( it.is_gunmod() ) {
+        /** @EFFECT_GUN >0 allows rating estimates for gun modifications */
+        if( you.get_skill_level( skill_gun ) == 0 ) {
+            return hint_rating::iffy;
+        } else {
+            return hint_rating::good;
+        }
+    } else if( it.is_food() || it.is_medication() || it.is_book() || it.is_armor() ) {
+        // The rating is subjective, could be argued as hint_rating::cant or hint_rating::good as well
+        return hint_rating::iffy;
+    } else if( it.type->has_use() ) {
+        return hint_rating::good;
+    }
+
+    return hint_rating::cant;
+}
+
+static hint_rating rate_action_wear( const avatar &you, const item &it )
+{
+    if( !it.is_armor() ) {
+        return hint_rating::cant;
+    }
+
+    if( you.is_worn( it ) ) {
+        return hint_rating::iffy;
+    }
+
+    return you.can_wear( it ).success() ? hint_rating::good : hint_rating::iffy;
+}
+
 /* item submenu for 'i' and '/'
 * It use draw_item_info to draw item info and action menu
 *
@@ -2051,20 +2163,20 @@ int game::inventory_item_menu( item_location locThisItem,
                     break;
             }
         };
-        addentry( 'a', pgettext( "action", "activate" ), u.rate_action_use( oThisItem ) );
-        addentry( 'R', pgettext( "action", "read" ), u.rate_action_read( oThisItem ) );
-        addentry( 'E', pgettext( "action", "eat" ), u.rate_action_eat( oThisItem ) );
-        addentry( 'W', pgettext( "action", "wear" ), u.rate_action_wear( oThisItem ) );
+        addentry( 'a', pgettext( "action", "activate" ), rate_action_use( u, oThisItem ) );
+        addentry( 'R', pgettext( "action", "read" ), rate_action_read( u, oThisItem ) );
+        addentry( 'E', pgettext( "action", "eat" ), rate_action_eat( u, oThisItem ) );
+        addentry( 'W', pgettext( "action", "wear" ), rate_action_wear( u, oThisItem ) );
         addentry( 'w', pgettext( "action", "wield" ), hint_rating::good );
         addentry( 't', pgettext( "action", "throw" ), hint_rating::good );
-        addentry( 'c', pgettext( "action", "change side" ), u.rate_action_change_side( oThisItem ) );
-        addentry( 'T', pgettext( "action", "take off" ), u.rate_action_takeoff( oThisItem ) );
+        addentry( 'c', pgettext( "action", "change side" ), rate_action_change_side( u, oThisItem ) );
+        addentry( 'T', pgettext( "action", "take off" ), rate_action_take_off( u, oThisItem ) );
         addentry( 'd', pgettext( "action", "drop" ), rate_drop_item );
         addentry( 'U', pgettext( "action", "unload" ), u.rate_action_unload( oThisItem ) );
         addentry( 'r', pgettext( "action", "reload" ), u.rate_action_reload( oThisItem ) );
         addentry( 'p', pgettext( "action", "part reload" ), u.rate_action_reload( oThisItem ) );
-        addentry( 'm', pgettext( "action", "mend" ), u.rate_action_mend( oThisItem ) );
-        addentry( 'D', pgettext( "action", "disassemble" ), u.rate_action_disassemble( oThisItem ) );
+        addentry( 'm', pgettext( "action", "mend" ), rate_action_mend( u, oThisItem ) );
+        addentry( 'D', pgettext( "action", "disassemble" ), rate_action_disassemble( u, oThisItem ) );
         if( oThisItem.has_pockets() ) {
             addentry( 'i', pgettext( "action", "insert" ), hint_rating::good );
             if( oThisItem.contents.num_item_stacks() > 0 ) {
@@ -3207,7 +3319,7 @@ void game::disp_NPCs()
                        m.posx(), m.posy(), m.posz() );
             ++i;
         }
-        wrefresh( w );
+        wnoutrefresh( w );
     } );
 
     input_context ctxt( "DISP_NPCS" );
@@ -3429,7 +3541,7 @@ void game::draw()
             it = draw_callbacks.erase( it );
         }
     }
-    wrefresh( w_terrain );
+    wnoutrefresh( w_terrain );
 
     draw_panels( true );
 }
@@ -3470,7 +3582,7 @@ void game::draw_panels( bool force_draw )
                                                      TERMX - panel.get_width() - panel_name_width - 1 : panel.get_width() + 1, y ) );
                     werase( label );
                     mvwprintz( label, point_zero, c_light_red, panel_name );
-                    wrefresh( label );
+                    wnoutrefresh( label );
                     label = catacurses::newwin( h, 1,
                                                 point( sidebar_right ? TERMX - panel.get_width() - 1 : panel.get_width(), y ) );
                     werase( label );
@@ -3483,7 +3595,7 @@ void game::draw_panels( bool force_draw )
                         }
                         mvwputch( label, point( 0, h - 1 ), c_light_red, sidebar_right ? LINE_XXOO : LINE_XOOX );
                     }
-                    wrefresh( label );
+                    wnoutrefresh( label );
                 }
                 y += h;
             }
@@ -3809,7 +3921,7 @@ void game::draw_minimap()
         }
     }
 
-    wrefresh( w_minimap );
+    wnoutrefresh( w_minimap );
 }
 
 float game::natural_light_level( const int zlev ) const
@@ -3960,7 +4072,6 @@ std::unordered_set<tripoint> game::get_fishable_locations( int distance, const t
                 to_check.push( current_point + point_west );
             }
         }
-        return;
     };
 
     // Starting at the provided location, get our fishable terrain
@@ -4510,7 +4621,6 @@ void game::overmap_npc_move()
             reload_npcs();
         }
     }
-    return;
 }
 
 /* Knockback target at t by force number of tiles in direction from s to t
@@ -5875,37 +5985,57 @@ cata::optional<tripoint> game::look_debug()
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-void game::draw_terrain_indicator( const tripoint &lp, const visibility_variables &cache ) const
+void game::draw_look_around_cursor( const tripoint &lp, const visibility_variables &cache )
 {
-    visibility_type visibility = VIS_HIDDEN;
-    const bool inbounds = m.inbounds( lp );
-    if( inbounds ) {
-        visibility = m.get_visibility( m.apparent_light_at( lp, cache ), cache );
-    }
-    const Creature *creature = critter_at( lp, true );
-    switch( visibility ) {
-        case VIS_CLEAR:
+    if( !liveview.is_enabled() ) {
 #if defined( TILES )
-            if( !is_draw_tiles_mode() && !liveview.is_enabled() )
+        if( is_draw_tiles_mode() ) {
+            draw_cursor( lp );
+            return;
+        }
 #endif
-            {
-                if( creature != nullptr && u.sees( *creature ) ) {
-                    creature->draw( w_terrain, lp, true );
-                } else {
-                    m.drawsq( w_terrain, u, lp, true, true, lp );
-                }
+        const tripoint view_center = u.pos() + u.view_offset;
+        visibility_type visibility = VIS_HIDDEN;
+        const bool inbounds = m.inbounds( lp );
+        if( inbounds ) {
+            visibility = m.get_visibility( m.apparent_light_at( lp, cache ), cache );
+        }
+        if( visibility == VIS_CLEAR ) {
+            const Creature *const creature = critter_at( lp, true );
+            if( creature != nullptr && u.sees( *creature ) ) {
+                creature->draw( w_terrain, view_center, true );
+            } else {
+                m.drawsq( w_terrain, u, lp, true, true, view_center );
             }
-            break;
-        case VIS_HIDDEN:
-#if defined( TILES )
-            if( !is_draw_tiles_mode() && !liveview.is_enabled() )
-#endif
-            {
-                print_visibility_indicator( visibility );
+        } else {
+            std::string visibility_indicator;
+            nc_color visibility_indicator_color = c_white;
+            switch( visibility ) {
+                case VIS_CLEAR:
+                    // Already handled by the outer if statement
+                    break;
+                case VIS_BOOMER:
+                case VIS_BOOMER_DARK:
+                    visibility_indicator = '#';
+                    visibility_indicator_color = c_pink;
+                    break;
+                case VIS_DARK:
+                    visibility_indicator = '#';
+                    visibility_indicator_color = c_dark_gray;
+                    break;
+                case VIS_LIT:
+                    visibility_indicator = '#';
+                    visibility_indicator_color = c_light_gray;
+                    break;
+                case VIS_HIDDEN:
+                    visibility_indicator = 'x';
+                    visibility_indicator_color = c_white;
+                    break;
             }
-            break;
-        default:
-            break;
+
+            const tripoint screen_pos = point( POSX, POSY ) + lp - view_center;
+            mvwputch( w_terrain, screen_pos.xy(), visibility_indicator_color, visibility_indicator );
+        }
     }
 }
 
@@ -6157,36 +6287,6 @@ void game::print_vehicle_info( const vehicle *veh, int veh_part, const catacurse
     }
 }
 
-void game::print_visibility_indicator( visibility_type visibility ) const
-{
-    std::string visibility_indicator;
-    nc_color visibility_indicator_color = c_white;
-    switch( visibility ) {
-        case VIS_CLEAR:
-            // Nothing printed when visibility is clear
-            return;
-        case VIS_BOOMER:
-        case VIS_BOOMER_DARK:
-            visibility_indicator = '#';
-            visibility_indicator_color = c_pink;
-            break;
-        case VIS_DARK:
-            visibility_indicator = '#';
-            visibility_indicator_color = c_dark_gray;
-            break;
-        case VIS_LIT:
-            visibility_indicator = '#';
-            visibility_indicator_color = c_light_gray;
-            break;
-        case VIS_HIDDEN:
-            visibility_indicator = 'x';
-            visibility_indicator_color = c_white;
-            break;
-    }
-
-    mvwputch( w_terrain, point( POSX, POSY ), visibility_indicator_color, visibility_indicator );
-}
-
 void game::print_items_info( const tripoint &lp, const catacurses::window &w_look, const int column,
                              int &line,
                              const int last_line )
@@ -6276,7 +6376,7 @@ static void zones_manager_shortcuts( const catacurses::window &w_info )
                             _( "<S>how all / hide distant" ) ) + 2;
     shortcut_print( w_info, point( tmpx, 3 ), c_white, c_light_green, _( "<M>ap" ) );
 
-    wrefresh( w_info );
+    wnoutrefresh( w_info );
 }
 
 static void zones_manager_draw_borders( const catacurses::window &w_border,
@@ -6305,7 +6405,7 @@ static void zones_manager_draw_borders( const catacurses::window &w_border,
               LINE_XOXX ); // -|
 
     mvwprintz( w_border, point( 2, 0 ), c_white, _( "Zones manager" ) );
-    wrefresh( w_border );
+    wnoutrefresh( w_border );
 
     for( int j = 0; j < iInfoHeight - 1; ++j ) {
         mvwputch( w_info_border, point( 0, j ), c_light_gray, LINE_XOXO );
@@ -6318,7 +6418,7 @@ static void zones_manager_draw_borders( const catacurses::window &w_border,
 
     mvwputch( w_info_border, point( 0, iInfoHeight - 1 ), c_light_gray, LINE_XXOO );
     mvwputch( w_info_border, point( width - 1, iInfoHeight - 1 ), c_light_gray, LINE_XOOX );
-    wrefresh( w_info_border );
+    wnoutrefresh( w_info_border );
 }
 
 void game::zones_manager()
@@ -6433,7 +6533,7 @@ void game::zones_manager()
             }
         }
 
-        wrefresh( w_zones_options );
+        wnoutrefresh( w_zones_options );
     };
 
     cata::optional<tripoint> zone_start;
@@ -6507,7 +6607,7 @@ void game::zones_manager()
             calcStartPos( start_index, active_index, max_rows, zone_cnt );
 
             draw_scrollbar( w_zones_border, active_index, max_rows, zone_cnt, point_south );
-            wrefresh( w_zones_border );
+            wnoutrefresh( w_zones_border );
 
             int iNum = 0;
 
@@ -6553,7 +6653,7 @@ void game::zones_manager()
             zones_manager_options();
         }
 
-        wrefresh( w_zones );
+        wnoutrefresh( w_zones );
     } );
 
     zones_manager_open = true;
@@ -6884,10 +6984,10 @@ look_around_result game::look_around( const bool show_window, tripoint &center,
             const int last_line = getmaxy( w_info ) - 2;
             pre_print_all_tile_info( lp, w_info, first_line, last_line, cache );
 
-            wrefresh( w_info );
+            wnoutrefresh( w_info );
         } );
         ter_indicator_cb = make_shared_fast<draw_callback_t>( [&]() {
-            draw_terrain_indicator( lp, cache );
+            draw_look_around_cursor( lp, cache );
         } );
         add_draw_callback( ter_indicator_cb );
     }
@@ -7468,7 +7568,7 @@ game::vmenu_ret game::list_items( const std::vector<map_item_stack> &item_list )
         reset_item_list_state( w_items_border, iInfoHeight, sort_radius );
 
         if( ground_items.empty() ) {
-            wrefresh( w_items_border );
+            wnoutrefresh( w_items_border );
             mvwprintz( w_items, point( 2, 10 ), c_white, _( "You don't see any items around you!" ) );
         } else {
             int iStartPos = 0;
@@ -7563,7 +7663,7 @@ game::vmenu_ret game::list_items( const std::vector<map_item_stack> &item_list )
                 draw_item_info( w_item_info, dummy );
             }
             draw_scrollbar( w_items_border, iActive, iMaxRows, iItemNum, point_south );
-            wrefresh( w_items_border );
+            wnoutrefresh( w_items_border );
         }
 
         const bool bDrawLeft = ground_items.empty() || filtered_items.empty() || !activeItem || filter_type;
@@ -7577,8 +7677,8 @@ game::vmenu_ret game::list_items( const std::vector<map_item_stack> &item_list )
             wprintw( w_item_info, " >" );
         }
 
-        wrefresh( w_items );
-        wrefresh( w_item_info );
+        wnoutrefresh( w_items );
+        wnoutrefresh( w_item_info );
 
         if( filter_type ) {
             draw_item_filter_rules( w_item_info, 0, iInfoHeight - 1, filter_type.value() );
@@ -8042,10 +8142,10 @@ game::vmenu_ret game::list_monsters( const std::vector<Creature *> &monster_list
                                 point_south );
             }
 
-            wrefresh( w_monsters_border );
-            wrefresh( w_monster_info_border );
-            wrefresh( w_monsters );
-            wrefresh( w_monster_info );
+            wnoutrefresh( w_monsters_border );
+            wnoutrefresh( w_monster_info_border );
+            wnoutrefresh( w_monsters );
+            wnoutrefresh( w_monster_info );
         }
     } );
 

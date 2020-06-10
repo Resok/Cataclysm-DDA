@@ -749,11 +749,11 @@ void basecamp::get_available_missions_by_dir( mission_data &mission_key, const p
         comp_list npc_list = get_mission_workers( "_faction_camp_firewood" );
         const base_camps::miss_data &miss_info = base_camps::miss_info[ "_faction_camp_firewood" ];
         entry = string_format( _( "Notes:\n"
-                                  "Send a companion to gather light brush and heavy sticks.\n\n"
+                                  "Send a companion to gather light brush and stout branches.\n\n"
                                   "Skill used: survival\n"
                                   "Difficulty: N/A\n"
                                   "Gathering Possibilities:\n"
-                                  "> heavy sticks\n"
+                                  "> stout branches\n"
                                   "> withered plants\n"
                                   "> splintered wood\n\n"
                                   "Risk: Very Low\n"
@@ -1693,7 +1693,7 @@ void basecamp::worker_assignment_ui()
         }
         mvwprintz( w_followers, point( 1, FULL_SCREEN_HEIGHT - 1 ), c_light_gray,
                    _( "Press %s to assign this follower to this camp." ), ctxt.get_desc( "CONFIRM" ) );
-        wrefresh( w_followers );
+        wnoutrefresh( w_followers );
     } );
 
     while( true ) {
@@ -1806,7 +1806,7 @@ void basecamp::job_assignment_ui()
         }
         mvwprintz( w_jobs, point( 1, FULL_SCREEN_HEIGHT - 1 ), c_light_gray,
                    _( "Press %s to change this workers job priorities." ), ctxt.get_desc( "CONFIRM" ) );
-        wrefresh( w_jobs );
+        wnoutrefresh( w_jobs );
     } );
 
     while( true ) {
@@ -3008,7 +3008,7 @@ void talk_function::draw_camp_tabs( const catacurses::window &win,
         tab_space += tab_step + utf8_width( t );
         tab_x++;
     }
-    wrefresh( win );
+    wnoutrefresh( win );
 }
 
 std::string talk_function::name_mission_tabs( const tripoint &omt_pos, const std::string &role_id,
